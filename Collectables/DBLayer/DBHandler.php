@@ -13,14 +13,12 @@
  */
 class DBHander 
 {
-    
     var $db_port = null;
     var $db_user = null;
     var $db_pass = null;
     var $db_name = null;
     var $errorMsgs = null;
-    
-    
+        
     function setDB($db_port,$db_user,$db_pass,$db_name)
     {
         $this->db_port = $db_port;
@@ -31,13 +29,13 @@ class DBHander
     
     function connectToDB()
     {
-                        $this->errorMsgs = array();
-			$dbcnx = new mysqli($this->db_port, $this->db_user,$this->db_pass, $this->db_name);
-			if($dbcnx->connect_errno)
-                        {
-                                $this->errorMsgs[] = "Unable to connect to the database server. Error code " . $dbcnx->connect_errno . ": " . $dbcnx->connect_error;
-                        }
-                        return $dbcnx;
+        $this->errorMsgs = array();
+        $dbcnx = new mysqli($this->db_port, $this->db_user,$this->db_pass, $this->db_name);
+        if($dbcnx->connect_errno)
+        {
+                $this->errorMsgs[] = "Unable to connect to the database server. Error code " . $dbcnx->connect_errno . ": " . $dbcnx->connect_error;
+        }
+        return $dbcnx;
      }
      
      function clearErrorMsgs()
@@ -71,7 +69,5 @@ class DBHander
      {
          return ($dbcnx->close());
      }
-
 }
-
 ?>
