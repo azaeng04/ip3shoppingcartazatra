@@ -161,11 +161,12 @@ class ShoppingCart
     }
 
     private function emptyCart()
-    {      
-        foreach($this->shoppingCart as $element)
+    {
+        foreach($this->shoppingCart as $key => $value)
         {
-           $this->shoppingCart[$element] = 0;         
+           $this->shoppingCart[$key] = 0;         
         }        
+        $this->changeURL($_SERVER['SCRIPT_NAME']);
     }
 
     private function removeAll()
