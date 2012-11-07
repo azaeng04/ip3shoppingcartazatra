@@ -113,19 +113,31 @@ class ShoppingCart
                          "&ItemToRemove=$ID'>Remove " . " Item</a></td>\n";
             $subtotal += ($Info['prodPrice'] * $this->shoppingCart[$ID]);
         }
-        return $subtotal;
+        return $subtotal;  
     }
     public function showCart() 
     {
     }
 
+    public function changeURL($uriPassed)
+    {
+        if (!empty($_SERVER['HTTPS']) && ('on' == $_SERVER['HTTPS'])) {
+		$uri = 'https://';
+	} else {
+		$uri = 'http://';
+	}
+	$uri .= $_SERVER['HTTP_HOST'];
+	header('Location: '.$uri.$uriPassed);
+    }
+    
     private  function addItem()
     {
             $ID = $_GET['ItemToAdd'];
             if (array_key_exists($ID, $this->shoppingCart))
             {
                   $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
-            }
+            }         
+            $this->changeURL($_SERVER['SCRIPT_NAME']);
     }
 
     private  function addOne()
@@ -145,15 +157,15 @@ class ShoppingCart
             else
                     echo("Cannot remove as already zero in the cart");
         }
+        $this->changeURL($_SERVER['SCRIPT_NAME']);
     }
 
     private function emptyCart()
-    {
+    {      
         foreach($this->shoppingCart as $element)
         {
-           $this->shoppingCart[$element] = 0;
-        }
-        print_r($this->shoppingCart);
+           $this->shoppingCart[$element] = 0;         
+        }        
     }
 
     private function removeAll()
@@ -194,6 +206,6 @@ class ShoppingCart
     public function checkout()
     {			
             echo "<p><strong>Your order has been recorded.</strong></p>\n";
-    }
+    }  
 }
 ?>
