@@ -34,7 +34,6 @@ else {
     <h2><?php echo htmlentities($storeInfo['storeDesc']); ?></h2>
     <p><?php echo htmlentities($storeInfo['welcomeMsg']); ?></p>
     <?php
-     echo "<p> Calling get Product List </p>";
          $Store->getProductList();
          $_SESSION['currentStore'] = serialize($Store);
          //'ShowCart.php?PHPSESSID

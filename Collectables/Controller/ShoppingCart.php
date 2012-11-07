@@ -1,7 +1,7 @@
 <?php
 
 define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
-require_once(__ROOTShoppingCart__.'\DBLayer\DBHandler.php'); 
+require_once(__ROOTShoppingCart__.'\DBLayer\DBHander.php'); 
 
 class ShoppingCart
 {      
@@ -83,7 +83,7 @@ class ShoppingCart
             $subtotal = 0;
             if(count($this->inventory) > 0)
             {
-                echo"<table width= '100%'>\n";
+                echo"<table width= '100%' align='center'>\n";
                 echo"<tr><th>Product Name</th><th>Product Description</th>".
                         "<th>Price Each</th><th>Quantity in Cart</th>" .
                         "<th>Total Price</th><th>&nbsp;</th></tr>\n";
@@ -121,11 +121,11 @@ class ShoppingCart
 
     private  function addItem()
     {
-                  $ID = $_GET['ItemToAdd'];
-                  if (array_key_exists($ID, $this->shoppingCart))
-		  {
-			$this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
-		  }
+            $ID = $_GET['ItemToAdd'];
+            if (array_key_exists($ID, $this->shoppingCart))
+            {
+                  $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
+            }
     }
 
     private  function addOne()
@@ -135,24 +135,24 @@ class ShoppingCart
 
     private function removeItem()
     {
-                $ID = $_GET['ItemToRemove'];
-                if (array_key_exists($ID, $this->shoppingCart))
-                {
-                    if($this->shoppingCart[$ID] > 0)
-                    {
-                            $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
-                    }
-                    else
-                            echo("Canot remove as already zero in the cart");
-                }
+        $ID = $_GET['ItemToRemove'];
+        if (array_key_exists($ID, $this->shoppingCart))
+        {
+            if($this->shoppingCart[$ID] > 0)
+            {
+                    $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
+            }
+            else
+                    echo("Cannot remove as already zero in the cart");
+        }
     }
 
     private function emptyCart()
     {
-                 foreach($this->shoppingCart as $ID)
-                 {
-                    $this->shoppingCart[$ID] = 0;
-                 }
+        foreach($this->shoppingCart as $ID)
+        {
+           $this->shoppingCart[$ID] = 0;
+        }
     }
 
     private function removeAll()
