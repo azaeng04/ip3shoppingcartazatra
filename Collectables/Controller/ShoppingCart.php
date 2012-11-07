@@ -149,10 +149,11 @@ class ShoppingCart
 
     private function emptyCart()
     {
-        foreach($this->shoppingCart as $ID)
+        foreach($this->shoppingCart as $element)
         {
-           $this->shoppingCart[$ID] = 0;
+           $this->shoppingCart[$element] = 0;
         }
+        print_r($this->shoppingCart);
     }
 
     private function removeAll()
