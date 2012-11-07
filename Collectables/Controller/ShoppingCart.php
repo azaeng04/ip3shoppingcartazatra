@@ -122,7 +122,7 @@ class ShoppingCart
     private  function addItem()
     {
                   $ID = $_GET['ItemToAdd'];
-                  if (array_key_exists($ID, shoppingCart))
+                  if (array_key_exists($ID, $this->shoppingCart))
 		  {
 			$this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
 		  }
