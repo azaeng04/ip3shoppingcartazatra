@@ -121,7 +121,11 @@ class ShoppingCart
 
     private  function addItem()
     {
-
+                  $ID = $_GET['ItemToAdd'];
+                  if (array_key_exists($ID, shoppingCart))
+		  {
+			$this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
+		  }
     }
 
     private  function addOne()
@@ -131,12 +135,24 @@ class ShoppingCart
 
     private function removeItem()
     {
-
+                $ID = $_GET['ItemToRemove'];
+                if (array_key_exists($ID, $this->shoppingCart))
+                {
+                    if($this->shoppingCart[$ID] > 0)
+                    {
+                            $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
+                    }
+                    else
+                            echo("Canot remove as already zero in the cart");
+                }
     }
 
     private function emptyCart()
     {
-
+                 foreach($this->shoppingCart as $ID)
+                 {
+                    $this->shoppingCart[$ID] = 0;
+                 }
     }
 
     private function removeAll()
