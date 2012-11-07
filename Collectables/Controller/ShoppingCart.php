@@ -1,7 +1,7 @@
 <?php
 
-define('__ROOT__', dirname(__FILE__)); 
-require_once(__ROOT__.'\DBLayer\DBHandler.php'); 
+define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
+require_once(__ROOTShoppingCart__.'\DBLayer\DBHandler.php'); 
 
 class ShoppingCart
 {      

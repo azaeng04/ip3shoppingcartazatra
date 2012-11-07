@@ -1,7 +1,6 @@
 <?php
 session_start();
-define('__ROOT__', dirname(__FILE__)); 
-require_once(__ROOT__.'\Controller\ShoppingCart.php');
+require_once('\Controller\ShoppingCart.php');
 $storeID = "Cars";
 $storeInfo = array();
 if (class_exists("ShoppingCart")){
