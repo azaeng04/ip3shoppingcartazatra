@@ -11,7 +11,7 @@ class ShoppingCart
     private $shoppingCart = array();
     private $storeID = "";
 
-
+    
     function __construct()
     {
             $this->DBHandler = new DBHander();
@@ -41,7 +41,7 @@ class ShoppingCart
                 $this->populateInventory($QueryResult);
             }
     }
-
+    
     private function populateInventory($QueryResult)
     {
         if($QueryResult === FALSE)
@@ -204,7 +204,8 @@ class ShoppingCart
             
                 if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
                 {
-                    //$this->changeURL($_SERVER['PHP_SELF'] . "?promptAdd=true&ID=".$ID);
+                    
+                    $this->changeURL('/Collectables/Controller/AddItemPrompt.php');
                 }
 
                 if (array_key_exists($ID, $this->shoppingCart))
@@ -232,15 +233,12 @@ class ShoppingCart
             {
                 if($this->shoppingCart[$ID] > 0)
                 {
-                        $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;                        
+                        $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
                 }
                 else
                     echo("Cannot remove as already zero in the cart");
             }
-            $this->shoppingCart = array_values($this->shoppingCart);
         }        
-        print_r($this->shoppingCart);
-        
     }
 
     private function emptyCart()
@@ -275,12 +273,14 @@ class ShoppingCart
 
     public function getProductInfo($prodID) 
     {
+        
             $SQLstring = "SELECT * FROM product WHERE prodID = '" . $prodID . "'";
             $QueryResult = @$this->DBConnect->query($SQLstring);
             if($QueryResult === FALSE)
                 exit("<p>Error Obtaining Product Info!</p>");
             else 
             {
+                
                 $Row = $QueryResult->fetch_assoc();
                 if($Row !== NULL) 
                 {
