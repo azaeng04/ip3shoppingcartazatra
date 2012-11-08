@@ -84,14 +84,19 @@ class ShoppingCart
             if(count($this->inventory) > 0)
             {
                 echo"<table width= '100%' align='center'>\n";
-                echo"<tr><th>Product Name</th><th>Product Description</th>".
-                        "<th>Price Each</th><th>Quantity in Cart</th>" .
-                        "<th>Total Price</th><th>&nbsp;</th></tr>\n";
+                echo"<tr align='left'><th>Product Name</th><th>Product Description</th>".
+                        "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
+                        "<th>Total Price</th><th><a href='showcart.php'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
                 $this->populateTableContent($subtotal);
+                
                 echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
                 printf("<td >$%.2f</td>\n", $subtotal);
                 echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                            "&EmptyCart=TRUE'>Empty ". " Cart</a></td></tr>\n";
+                            "&EmptyCart=TRUE'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
+                echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
+                        "<th>&nbsp;</th><th>&nbsp;</th>" .
+                        "<th>&nbsp;</th><th align='left'></th>".
+                        "<th>&nbsp;</th></tr>\n";
                 echo"</table>";
                 $retval = TRUE;
             }
@@ -99,20 +104,22 @@ class ShoppingCart
     }
 
     private function populateTableContent(&$subtotal)
-    {
+    {        
         foreach($this->inventory as $ID => $Info)
-        {
+        {            
             echo "<tr><td >". htmlentities($Info['prodName'])."</td>\n";
             echo "<td >".htmlentities($Info['prodDesc'])."</td>\n";
             printf("<td >$%.2f</td>\n", $Info['prodPrice']);
-            echo "<td >".$this->shoppingCart[$ID]."</td>\n";
+            echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
             printf("<td >$%.2f</td>\n", $Info['prodPrice'] * $this->shoppingCart[$ID]);
-            echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
-                         "&ItemToAdd=$ID'>Add " . " Item</a><br />\n";
+            echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
+                         "&ItemToAdd=$ID'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                         "&ItemToRemove=$ID'>Remove " . " Item</a></td>\n";
+                         "&ItemToRemove=$ID'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
+            echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
+                         "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
             $subtotal += ($Info['prodPrice'] * $this->shoppingCart[$ID]);
-        }
+        }        
         return $subtotal;  
     }
     public function showCart() 
