@@ -159,7 +159,7 @@ class ShoppingCart
             
                 if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
                 {
-                    echo("Its the same");
+                    //$this->changeURL($_SERVER['PHP_SELF'] . "?promptAdd=true&ID=".$ID);
                 }
 
                 if (array_key_exists($ID, $this->shoppingCart))
@@ -194,7 +194,10 @@ class ShoppingCart
                 else
                         echo("Cannot remove as already zero in the cart");
             }
+            $this->shoppingCart = array_values($this->shoppingCart);
         }
+        print_r($this->shoppingCart);
+        
     }
 
     private function emptyCart()
