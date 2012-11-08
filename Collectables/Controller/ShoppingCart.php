@@ -81,6 +81,7 @@ class ShoppingCart
     {
             $retval = FALSE;
             $subtotal = 0;
+             $timestamp = sha1(microtime(true));
             if(count($this->inventory) > 0)
             {
                 echo"<table width= '100%' align='center'>\n";
@@ -92,7 +93,7 @@ class ShoppingCart
                 echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
                 printf("<td >$%.2f</td>\n", $subtotal);
                 echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                            "&EmptyCart=TRUE'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
+                            "&EmptyCart=TRUE&tokenID=" . $timestamp ."'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
                 echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
                         "<th>&nbsp;</th><th>&nbsp;</th>" .
                         "<th>&nbsp;</th><th align='left'></th>".
@@ -105,6 +106,7 @@ class ShoppingCart
 
     private function populateTableContent(&$subtotal)
     {        
+        $timestamp = sha1(microtime(true));
         foreach($this->inventory as $ID => $Info)
         {            
             echo "<tr><td >". htmlentities($Info['prodName'])."</td>\n";
@@ -113,9 +115,9 @@ class ShoppingCart
             echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
             printf("<td >$%.2f</td>\n", $Info['prodPrice'] * $this->shoppingCart[$ID]);
             echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
-                         "&ItemToAdd=$ID'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
+                         "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                         "&ItemToRemove=$ID'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
+                         "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                          "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
             $subtotal += ($Info['prodPrice'] * $this->shoppingCart[$ID]);
@@ -137,14 +139,38 @@ class ShoppingCart
 	header('Location: '.$uri.$uriPassed);
     }
     
+    private function refreshed()
+    {
+        $checkRef = -1;
+        if (isset($_GET['tokenID']))
+        {
+                     $checkRef = isset($_SESSION['prevToken']) && strcmp($_GET['tokenID'], $_SESSION['prevToken']) == 0;
+                     $_SESSION['prevToken'] = $_GET['tokenID'];
+        } 
+        return $checkRef;
+    }
+    
     private  function addItem()
     {
-            $ID = $_GET['ItemToAdd'];
-            if (array_key_exists($ID, $this->shoppingCart))
+            
+            if(!$this->refreshed())
             {
-                  $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
-            }         
-            $this->changeURL($_SERVER['SCRIPT_NAME']);
+                $ID = $_GET['ItemToAdd'];
+            
+                if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
+                {
+                    echo("Its the same");
+                }
+
+                if (array_key_exists($ID, $this->shoppingCart))
+                {
+                      $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
+                }         
+                $_SESSION['Last_ID'] = $ID;
+            }
+
+            
+            //$this->changeURL($_SERVER['SCRIPT_NAME']);
     }
 
     private  function addOne()
@@ -154,26 +180,32 @@ class ShoppingCart
 
     private function removeItem()
     {
-        $ID = $_GET['ItemToRemove'];
-        if (array_key_exists($ID, $this->shoppingCart))
+        if(!$this->refreshed())
         {
-            if($this->shoppingCart[$ID] > 0)
+        $ID = $_GET['ItemToRemove'];
+            if (array_key_exists($ID, $this->shoppingCart))
             {
-                    $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
+                if($this->shoppingCart[$ID] > 0)
+                {
+                        $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
+                        if ($this->shoppingCart[$ID] == 0)
+                            unset ($this->shoppingCart[$ID]);
+                }
+                else
+                        echo("Cannot remove as already zero in the cart");
             }
-            else
-                    echo("Cannot remove as already zero in the cart");
         }
-        $this->changeURL($_SERVER['SCRIPT_NAME']);
     }
 
     private function emptyCart()
     {
-        foreach($this->shoppingCart as $key => $value)
+        if(!$this->refreshed())
         {
-           $this->shoppingCart[$key] = 0;         
-        }        
-        $this->changeURL($_SERVER['SCRIPT_NAME']);
+            foreach($this->shoppingCart as $key => $value)
+            {
+               $this->shoppingCart[$key] = 0;         
+            }        
+        }
     }
 
     private function removeAll()
