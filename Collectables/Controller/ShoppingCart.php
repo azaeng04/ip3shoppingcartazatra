@@ -79,53 +79,98 @@ class ShoppingCart
 
     public function getProductList()
     {
-            $retval = FALSE;
-            $subtotal = 0;
-             $timestamp = sha1(microtime(true));
-            if(count($this->inventory) > 0)
+        $retval = FALSE;
+        $subtotal = 0;
+        $timestamp = sha1(microtime(true));
+        $redirect = "http://localhost/Collectables/showcart.php";
+        if(count($this->inventory) > 0)
+        {
+            if (strstr($_SERVER['SCRIPT_NAME'], 'testFunctions.php')) 
             {
-                echo"<table width= '100%' align='center'>\n";
-                echo"<tr align='left'><th>Product Name</th><th>Product Description</th>".
-                        "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
-                        "<th>Total Price</th><th><a href='showcart.php'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
-                $this->populateTableContent($subtotal);
-                
-                echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
-                printf("<td >$%.2f</td>\n", $subtotal);
-                echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                            "&EmptyCart=TRUE&tokenID=" . $timestamp ."'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
-                echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
-                        "<th>&nbsp;</th><th>&nbsp;</th>" .
-                        "<th>&nbsp;</th><th align='left'></th>".
-                        "<th>&nbsp;</th></tr>\n";
-                echo"</table>";
-                $retval = TRUE;
+                echo $this->tableHeaders()."<th><a href='$redirect'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
+
+                $this->populateInvTableContent($subtotal, $timestamp);
             }
-            return($retval);
+            else
+            {
+                echo $this->tableHeaders()."<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
+
+                $this->populateCartTableContent($subtotal, $timestamp);
+            }
+           
+            $this->subtotal($subtotal, $timestamp);
+            $retval = TRUE;
+        }
+        return($retval);      
     }
 
-    private function populateTableContent(&$subtotal)
+    private function tableHeaders()
+    {
+        return "<table width= '100%' align='center'>\n".
+                "<tr align='left'><th>Product Name</th><th>Product Description</th>".
+                "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
+                "<th>Total Price</th>";
+    }
+    
+    private function subtotal($subtotal, $timestamp)
+    {
+        echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
+        printf("<td >$%.2f</td>\n", $subtotal);
+        echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+                    "&EmptyCart=TRUE&tokenID=" . $timestamp ."'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
+        echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
+                "<th>&nbsp;</th><th>&nbsp;</th>" .
+                "<th>&nbsp;</th><th align='left'></th>".
+                "<th>&nbsp;</th></tr>\n";
+        echo"</table>";
+    }
+    
+    private function populateInvTableContent(&$subtotal, $timestamp)
     {        
         $timestamp = sha1(microtime(true));
-        foreach($this->inventory as $ID => $Info)
-        {            
-            echo "<tr><td >". htmlentities($Info['prodName'])."</td>\n";
-            echo "<td >".htmlentities($Info['prodDesc'])."</td>\n";
-            printf("<td >$%.2f</td>\n", $Info['prodPrice']);
+        foreach($this->inventory as $ID => $value)
+        {  
+            echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
+            echo "<td >".htmlentities($value['prodDesc'])."</td>\n";
+            printf("<td >$%.2f</td>\n", $value['prodPrice']);
             echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
-            printf("<td >$%.2f</td>\n", $Info['prodPrice'] * $this->shoppingCart[$ID]);
+            printf("<td >$%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
             echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
                          "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                          "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                          "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
-            $subtotal += ($Info['prodPrice'] * $this->shoppingCart[$ID]);
-        }        
-        return $subtotal;  
+            $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
+        } 
     }
+
+    private function populateCartTableContent(&$subtotal, $timestamp)
+    {        
+        $timestamp = sha1(microtime(true));
+        foreach($this->shoppingCart as $ID => $value)
+        {  
+            if ($value > 0) 
+            {
+                echo "<tr><td >". htmlentities($this->inventory[$ID]['prodName'])."</td>\n";
+                echo "<td >".htmlentities($this->inventory[$ID]['prodDesc'])."</td>\n";
+                printf("<td >$%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
+                echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
+                printf("<td >$%.2f</td>\n", $this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
+                echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
+                             "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
+                echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
+                             "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
+                echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
+                             "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+                $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
+            }
+        } 
+    }
+    
     public function showCart() 
     {
+        $this->getProductList();
     }
 
     public function changeURL($uriPassed)
@@ -187,15 +232,13 @@ class ShoppingCart
             {
                 if($this->shoppingCart[$ID] > 0)
                 {
-                        $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
-                        if ($this->shoppingCart[$ID] == 0)
-                            unset ($this->shoppingCart[$ID]);
+                        $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;                        
                 }
                 else
-                        echo("Cannot remove as already zero in the cart");
+                    echo("Cannot remove as already zero in the cart");
             }
             $this->shoppingCart = array_values($this->shoppingCart);
-        }
+        }        
         print_r($this->shoppingCart);
         
     }
