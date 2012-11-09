@@ -57,11 +57,38 @@ class ShoppingCart
                 $this->inventory[$Row['prodID']]['prodDesc'] = $Row['prodDesc'];
                 $this->inventory[$Row['prodID']]['prodPrice'] = $Row['prodPrice'];
                 $this->shoppingCart[$Row['prodID']] = 0;
+            } 
+        }
+        $this->inventory = $this->sortArray($this->inventory);
+    }
+    
+   
+    
+    
+    public function sortArray ($passedArr)
+    {
+       print_r($passedArr);
+       $size = count($passedArr);
+       for ($i=1; $i<$size; $i++) 
+       {
+        for ($j=1; $j<$size; $j++) 
+        {
+            if (strcmp($passedArr[$j+1]['prodName'], $passedArr[$j]['prodName']) < 0) 
+            {
+                $this->swap($passedArr, $j, $j+1);
             }
-            asort($this->inventory);
-            asort($this->shoppingCart);
         }
     }
+    return $passedArr;
+    }
+    
+    function swap(&$passedArr, $a, $b) 
+    {
+        $tmp = $passedArr[$a];
+        $passedArr[$a] = $passedArr[$b];
+        $passedArr[$b] = $tmp;
+    }
+
 
     public function getStoreInformation()
     {
