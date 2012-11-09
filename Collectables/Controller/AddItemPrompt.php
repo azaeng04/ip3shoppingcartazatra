@@ -1,10 +1,3 @@
-
-<?php
-
-define('__ROOTItemPrompt__', dirname(dirname(__FILE__))); 
-?>
-
-
 <html>
     <head>
         
@@ -23,8 +16,7 @@ define('__ROOTItemPrompt__', dirname(dirname(__FILE__)));
     </style>
     </head>
     <body>
-        
-        <form action = "<?php echo(__ROOTItemPrompt__."\\testFunctions.php" );?>" method="get">
+        <form action = "http:\\localhost\Collectables\testFunctions.php?" method="get">
             <table class="tablebg">
             	<tr>
                 <td colspan = 2>
@@ -43,6 +35,8 @@ define('__ROOTItemPrompt__', dirname(dirname(__FILE__)));
                     </td>
                     <td width ="100">
                         <input type = "submit" name ="btnNo" value ="No"/>
+                        <input type ="hidden" name ="ItemToAdd" value ="<?php echo($_GET['ID'])?>">
+                        <input type ="hidden" name ="tokenID" value ="<?php echo(sha1(microtime(true)))?>">
                     </td>
             </tr>
             </table>

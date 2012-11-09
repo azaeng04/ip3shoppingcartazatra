@@ -254,33 +254,37 @@ class ShoppingCart
     
     private function refreshed()
     {
-        $checkRef = -1;
+        $checkRef = false;
         if (isset($_GET['tokenID']))
         {
                      $checkRef = isset($_SESSION['prevToken']) && strcmp($_GET['tokenID'], $_SESSION['prevToken']) == 0;
-                     $_SESSION['prevToken'] = $_GET['tokenID'];
         } 
         return $checkRef;
     }
     
-    private  function addItem()
+    public  function addItem()
     {
-            
-            if(!$this->refreshed())
+            if(!$this->refreshed() && !isset($_GET['btnNo']) && isset($_GET['ItemToAdd']))
             {
+                
                 $ID = $_GET['ItemToAdd'];
             
+                
                 if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
                 {
+                    unset($_SESSION['Last_ID']);
                     $promptURL = "/Collectables/Controller/AddItemPrompt.php?productName=" . $this->inventory[$ID]['prodName'] . "&ID=" . $ID;
                     $this->changeURL($promptURL);
                 }
-
-                if (array_key_exists($ID, $this->shoppingCart))
+                else
                 {
+                      if (array_key_exists($ID, $this->shoppingCart))
+                      {
                       $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
-                }         
-                $_SESSION['Last_ID'] = $ID;
+                      }         
+                      $_SESSION['Last_ID'] = $ID;
+                      $_SESSION['prevToken'] = $_GET['tokenID'];
+                }
             }
 
             
@@ -306,6 +310,7 @@ class ShoppingCart
                 else
                     echo('<script type="text/javascript"> alert("The cart is already empty"); </script>');
             }
+        $_SESSION['prevToken'] = $_GET['tokenID'];
         }        
     }
 
@@ -317,6 +322,7 @@ class ShoppingCart
             {
                $this->shoppingCart[$key] = 0;         
             }        
+            $_SESSION['prevToken'] = $_GET['tokenID'];
         }
     }
 
