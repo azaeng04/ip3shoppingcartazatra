@@ -17,7 +17,6 @@ class ShoppingCart
             $this->DBHandler = new DBHander();
             $this->DBHandler->setDB('localhost', 'root', '', 'collectables');
             $this->DBConnect = $this->DBHandler->connectToDB();
-            echo "<p>Hello DBDatabase connected successfully</p>";
     }
 
     function __destruct()
@@ -59,6 +58,8 @@ class ShoppingCart
                 $this->inventory[$Row['prodID']]['prodPrice'] = $Row['prodPrice'];
                 $this->shoppingCart[$Row['prodID']] = 0;
             }
+            asort($this->inventory);
+            asort($this->shoppingCart);
         }
     }
 
@@ -125,17 +126,26 @@ class ShoppingCart
         return $retval;
     }
     
+    public function sortTable()
+    {
+        asort($this->inventory);
+        asort($this->shoppingCart);
+    }
+
+
     private function tableHeaders()
     {
         return "<table width= '100%' align='center'>\n".
-                "<tr align='left'><th>Product Name</th><th>Product Description</th>".
+                "<tr align='left'><th><a onclick='".$this->sortTable()."'>Product Name</a></th><th>Product Description</th>".
                 "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
                 "<th>Total Price</th>";
     }
     
     private function subtotal($subtotal, $timestamp)
-    {
-        static $prevPage = "";
+    {  
+        $prevPage = "";
+        $productsPage = "http://localhost/Collectables/testFunctions.php";
+        
         echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
         printf("<td >$%.2f</td>\n", $subtotal);
         
@@ -143,15 +153,16 @@ class ShoppingCart
         {
             if ($this->cartEmpty()) 
             {
-                echo "<td ><a href='$prevPage'><img src='images/images/cart/readd-items-to-cart.jpg' /></a></td></tr>\n";
+                echo "<td ><a href='$productsPage'><img src='images/images/cart/readd-items-to-cart.jpg' /></a></td></tr>\n";
             }
             else
+            {
+                $prevPage = $_SERVER['HTTP_REFERER'];
                 echo $this->echoEmptyCart($timestamp, $prevPage);
+            }
         }
         else
-        {
-            $prevPage = $_SERVER['SCRIPT_NAME'];
-            
+        {            
             echo $this->echoEmptyCart($timestamp, $prevPage);
         }
         echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
@@ -161,14 +172,14 @@ class ShoppingCart
         echo"</table>";
     }
     
-    private function echoEmptyCart($timestamp, $prevPage)
+    private function echoEmptyCart($timestamp, &$prevPage)
     {
         if (!$this->cartEmpty()) 
         {
             if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
             {
                 return "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a><a href='$prevPage'><img src='images/images/cart/readd-items-to-cart.jpg' /></a></td></tr>\n";
+                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a><a href='$prevPage'><img src='images/images/cart/edit-cart.jpg' /></a></td></tr>\n";
             }
             else
             {
@@ -293,7 +304,7 @@ class ShoppingCart
                         $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
                 }
                 else
-                    echo("Cannot remove as already zero in the cart");
+                    echo('<script type="text/javascript"> alert("The cart is already empty"); </script>');
             }
         }        
     }
@@ -321,7 +332,7 @@ class ShoppingCart
                         $this->shoppingCart[$ID] = 0;
                 }
                 else
-                    echo("Cannot remove as already zero in the cart");
+                    echo('<script type="text/javascript"> alert("The cart is already empty"); </script>');
             }
         }
     }
