@@ -126,17 +126,12 @@ class ShoppingCart
         return $retval;
     }
     
-    public function sortTable()
-    {
-        asort($this->inventory);
-        asort($this->shoppingCart);
-    }
 
 
     private function tableHeaders()
     {
         return "<table width= '100%' align='center'>\n".
-                "<tr align='left'><th><a onclick='".$this->sortTable()."'>Product Name</a></th><th>Product Description</th>".
+                "<tr align='left'><th>Product Name</th><th>Product Description</th>".
                 "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
                 "<th>Total Price</th>";
     }
@@ -157,7 +152,7 @@ class ShoppingCart
             }
             else
             {
-                $prevPage = $_SERVER['HTTP_REFERER'];
+                $prevPage = "http://localhost/Collectables/testFunctions.php";
                 echo $this->echoEmptyCart($timestamp, $prevPage);
             }
         }
@@ -195,7 +190,6 @@ class ShoppingCart
     
     private function populateInvTableContent(&$subtotal, $timestamp)
     { 
-        $timestamp = sha1(microtime(true));
         foreach($this->inventory as $ID => $value)
         {  
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
@@ -215,7 +209,6 @@ class ShoppingCart
 
     private function populateCartTableContent(&$subtotal, $timestamp)
     {        
-        $timestamp = sha1(microtime(true));
         foreach($this->shoppingCart as $ID => $value)
         {  
             if ($value > 0) 
