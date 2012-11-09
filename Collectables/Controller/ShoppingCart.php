@@ -197,7 +197,7 @@ class ShoppingCart
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                          "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                         "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+                         "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
         } 
     }
@@ -219,7 +219,7 @@ class ShoppingCart
                 echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                              "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
                 echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                             "&RemoveAll=$ID'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+                             "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
             }
         } 
@@ -311,7 +311,19 @@ class ShoppingCart
 
     private function removeAll()
     {
-
+        if(!$this->refreshed())
+        {
+        $ID = $_GET['RemoveAll'];
+            if (array_key_exists($ID, $this->shoppingCart))
+            {
+                if($this->shoppingCart[$ID] > 0)
+                {
+                        $this->shoppingCart[$ID] = 0;
+                }
+                else
+                    echo("Cannot remove as already zero in the cart");
+            }
+        }
     }
 
     public function processUserInput()
