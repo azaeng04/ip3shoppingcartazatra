@@ -1,4 +1,18 @@
 
+<?php
+ function changeURL($uriPassed)
+    {
+        if (!empty($_SERVER['HTTPS']) && ('on' == $_SERVER['HTTPS'])) {
+		$uri = 'https://';
+	} else {
+		$uri = 'http://';
+	}
+	$uri .= $_SERVER['HTTP_HOST'];
+	header('Location: '.$uri.$uriPassed);
+    }
+?>
+
+
 <html>
     <head>
         
@@ -21,7 +35,13 @@
             <table class="tablebg">
             	<tr>
                 <td colspan = 2>
-                 	<label>Are are sure you want to add again?</label>
+                 	<label>Are are sure you want to add 
+                         <?php 
+                         if (isset($_GET['productName']) )
+                         {
+                             echo ($_GET['productName']);
+                         }
+                         ?> to the shopping cart again?</label>
                     </td>
                 </tr>
                 <tr>

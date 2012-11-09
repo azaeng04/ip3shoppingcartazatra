@@ -272,8 +272,8 @@ class ShoppingCart
             
                 if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
                 {
-                    
-                    $this->changeURL('/Collectables/Controller/AddItemPrompt.php');
+                    $promptURL = "/Collectables/Controller/AddItemPrompt.php?productName=" . $this->inventory[$ID]['prodName'] . "&ID=" . $ID;
+                    $this->changeURL($promptURL);
                 }
 
                 if (array_key_exists($ID, $this->shoppingCart))
