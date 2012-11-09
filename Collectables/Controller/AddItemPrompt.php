@@ -16,7 +16,9 @@
     </style>
     </head>
     <body>
-        <form action = "http:\\localhost\Collectables\testFunctions.php?" method="get">
+        <form action = " <?php 
+        $prevLink = $_SERVER['HTTP_REFERER'];
+        echo ($prevLink);?>" method="get">
             <table class="tablebg">
             	<tr>
                 <td colspan = 2>
