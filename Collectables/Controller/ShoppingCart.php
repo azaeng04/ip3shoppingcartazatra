@@ -87,8 +87,13 @@ class ShoppingCart
         {
             if (strstr($_SERVER['SCRIPT_NAME'], 'testFunctions.php')) 
             {
-                echo $this->tableHeaders()."<th><a href='$redirect'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
-
+                if ($this->cartEmpty()) 
+                {
+                    echo $this->tableHeaders()."<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
+                }
+                else
+                    echo $this->tableHeaders() . "<th><a href='$redirect'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
+                                    
                 $this->populateInvTableContent($subtotal, $timestamp);
             }
             else
@@ -104,6 +109,22 @@ class ShoppingCart
         return($retval);      
     }
 
+    private function cartEmpty()
+    {
+        $retval = TRUE;
+        
+        foreach ($this->shoppingCart as $key => $value) 
+        {
+            if ($value !== 0) 
+            {
+                $retval = FALSE;
+                break;
+            }
+        }
+        
+        return $retval;
+    }
+    
     private function tableHeaders()
     {
         return "<table width= '100%' align='center'>\n".
@@ -114,10 +135,25 @@ class ShoppingCart
     
     private function subtotal($subtotal, $timestamp)
     {
+        static $prevPage = "";
         echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
         printf("<td >$%.2f</td>\n", $subtotal);
-        echo "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                    "&EmptyCart=TRUE&tokenID=" . $timestamp ."'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
+        
+        if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
+        {
+            if ($this->cartEmpty()) 
+            {
+                echo "<td ><a href='$prevPage'><img src='images/images/cart/readd-items-to-cart.jpg' /></a></td></tr>\n";
+            }
+            else
+                echo $this->echoEmptyCart($timestamp, $prevPage);
+        }
+        else
+        {
+            $prevPage = $_SERVER['SCRIPT_NAME'];
+            
+            echo $this->echoEmptyCart($timestamp, $prevPage);
+        }
         echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
                 "<th>&nbsp;</th><th>&nbsp;</th>" .
                 "<th>&nbsp;</th><th align='left'></th>".
@@ -125,8 +161,29 @@ class ShoppingCart
         echo"</table>";
     }
     
+    private function echoEmptyCart($timestamp, $prevPage)
+    {
+        if (!$this->cartEmpty()) 
+        {
+            if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
+            {
+                return "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a><a href='$prevPage'><img src='images/images/cart/readd-items-to-cart.jpg' /></a></td></tr>\n";
+            }
+            else
+            {
+                return "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a></td></tr>\n";
+            }
+        } 
+        else
+        {
+            return "<td >&nbsp;</td></tr>\n";
+        }
+    }
+    
     private function populateInvTableContent(&$subtotal, $timestamp)
-    {        
+    { 
         $timestamp = sha1(microtime(true));
         foreach($this->inventory as $ID => $value)
         {  
