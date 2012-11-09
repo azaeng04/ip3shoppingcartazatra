@@ -1,15 +1,7 @@
 
 <?php
- function changeURL($uriPassed)
-    {
-        if (!empty($_SERVER['HTTPS']) && ('on' == $_SERVER['HTTPS'])) {
-		$uri = 'https://';
-	} else {
-		$uri = 'http://';
-	}
-	$uri .= $_SERVER['HTTP_HOST'];
-	header('Location: '.$uri.$uriPassed);
-    }
+
+define('__ROOTItemPrompt__', dirname(dirname(__FILE__))); 
 ?>
 
 
@@ -31,7 +23,8 @@
     </style>
     </head>
     <body>
-        <form>
+        
+        <form action = "<?php echo(__ROOTItemPrompt__."\\testFunctions.php" );?>" method="get">
             <table class="tablebg">
             	<tr>
                 <td colspan = 2>
@@ -46,10 +39,10 @@
                 </tr>
                 <tr>
                     <td width ="100">
-                            <input type = "button" value ="Yes"/>
+                            <input type = "submit" name ="btnYes" value ="Yes"/>
                     </td>
                     <td width ="100">
-                        <input type = "button" value ="No"/>
+                        <input type = "submit" name ="btnNo" value ="No"/>
                     </td>
             </tr>
             </table>
