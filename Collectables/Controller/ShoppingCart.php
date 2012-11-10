@@ -11,6 +11,9 @@ class ShoppingCart
     private $shoppingCart = array();
     private $checkout = array();
     private $storeID = "";
+    private $pageIteration = 0;
+    private $cartPageIteration = 0;
+    private $pageLimit = 4;
 
     
     function __construct()
@@ -41,6 +44,17 @@ class ShoppingCart
             }
     }
     
+    public function getPageLimit() 
+    {
+        return $this->pageLimit;
+    }
+
+    public function setPageLimit($pageLimit) 
+    {
+        $this->pageLimit = $pageLimit;
+    }
+
+        
     private function populateInventory($QueryResult)
     {
         if($QueryResult === FALSE)
@@ -217,8 +231,31 @@ class ShoppingCart
     
     private function populateInvTableContent(&$subtotal, $timestamp)
     { 
-        foreach($this->inventory as $ID => $value)
+        
+        $invSize = sizeof($this->inventory);
+        $invKeys = array_keys($this->inventory);
+        
+        if (!isset($_SESSION['invIteration']))
+        {
+            $this->pageIteration = 0;
+        }
+        else
+        {
+            if (isset($_GET['nextPage']))
+                $this->pageIteration = $_SESSION['invIteration'] + 1;
+            else if (isset($_GET['prevPage']))
+                $this->pageIteration = $_SESSION['invIteration'] - 1;
+        }
+        $_SESSION['invIteration'] = $this->pageIteration;
+        
+
+        $recordsPassed = $this->pageIteration *  $this->pageLimit;
+        $counter = 1;
+        while((($counter + $recordsPassed) <= $invSize) && $counter <= $this->pageLimit)
         {  
+            $value = $this->inventory[$counter + $recordsPassed];
+            $ID = $invKeys[$counter + $recordsPassed - 1];
+            
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
             echo "<td >".htmlentities($value['prodDesc'])."</td>\n";
             printf("<td class= 'currency'>$%.2f</td>\n", $value['prodPrice']);
@@ -231,13 +268,70 @@ class ShoppingCart
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                          "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
+            $counter++;
         } 
+        
+        echo("<tr>");
+        if (($this->pageIteration + 1) < ($invSize / $this->pageLimit))
+            echo("<td ><a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() . "&nextPage=yes'>Next Page</a></td>");
+        if ($this->pageIteration != 0)
+            echo("<td ><a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() ."&prevPage=yes''>Previous Page</a></td>");
+        echo("</tr>");
+        echo("<tr><td >Page: " . ($this->pageIteration + 1) . "</td></tr>");
+        //echo("<tr><td>" . $this->pageIteration + 1 . "</td></tr>");
+    }
+    
+    private function getRealCartSize()
+    {
+        $count = 0;
+        foreach($this->shoppingCart as $key => $value)
+        {
+            if ($value > 0)
+                $count++;
+        }
+        return $count;
+    }
+    
+    private function getRecordsPassed($recordsArr, $iteration)
+    {
+        $recordsPassed = 0;
+        foreach ($recordsArr as $key => $value)
+        {
+            if ($key < $iteration)
+                $recordsPassed = $recordsPassed + $value;
+        }
+        return $recordsPassed;
     }
 
     private function populateCartTableContent(&$subtotal, $timestamp)
     {  
-        foreach($this->shoppingCart as $ID => $value)
+        $cartSize = sizeof($this->shoppingCart);
+        $cartKeys = array_keys($this->shoppingCart);
+        if (!isset($_SESSION['cartIteration']))
+        {
+            $recordsArr = array();
+            $this->pageIteration = 0;
+            $recordsPassed = 0;
+        }
+        else
+        {
+            $recordsArr = $_SESSION['recordsArr'];
+            if (isset($_GET['nextPage']))
+                $this->cartPageIteration = $_SESSION['cartIteration'] + 1;
+            else if (isset($_GET['prevPage']))
+                $this->cartPageIteration = $_SESSION['cartIteration'] - 1;
+            else
+                $this->cartPageIteration = $_SESSION['cartIteration'];
+            $recordsPassed = $this->getRecordsPassed($recordsArr, $this->cartPageIteration);
+        }
+        $_SESSION['cartIteration'] = $this->cartPageIteration;
+        
+        $counter = 1;
+        $boughtItemIterator = 1;
+        while((($counter + $recordsPassed) <= $cartSize) && $boughtItemIterator <= $this->pageLimit)
         {  
+            $value = $this->shoppingCart[$counter + $recordsPassed];
+            $ID = $cartKeys[$counter + $recordsPassed - 1];
             if ($value > 0) 
             {                
                 echo "<tr><td >". htmlentities($this->inventory[$ID]['prodName'])."</td>\n";
@@ -252,10 +346,22 @@ class ShoppingCart
                 echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                              "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
-            
                 $this->checkout[$ID] = $this->shoppingCart[$ID];
+                $boughtItemIterator ++;
             }
+            $counter++;    
         }
+        $recordsArr[$this->cartPageIteration] = $counter - 1;
+        $_SESSION['recordsArr'] = $recordsArr;
+        
+        echo("<tr>");
+        $realCartSize = $this->getRealCartSize();
+        if (($this->cartPageIteration + 1) < ($realCartSize / $this->pageLimit))
+            echo("<td ><a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() . "&nextPage=yes'>Next Page</a></td>");
+        if ($this->cartPageIteration != 0)
+            echo("<td ><a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() ."&prevPage=yes''>Previous Page</a></td>");
+        echo("</tr>");
+        echo("<tr><td >Page: " . ($this->cartPageIteration + 1) . "</td></tr>");
     }
     
     public function showCart() 
@@ -325,6 +431,10 @@ class ShoppingCart
                 if($this->shoppingCart[$ID] > 0)
                 {
                         $this->shoppingCart[$ID] = $this->shoppingCart[$ID] - 1;
+                        if ($this->shoppingCart[$ID] == 0)
+                        {
+                            $this->movePageBack();
+                        }
                 }
                 else
                     echo('<script type="text/javascript"> alert("The cart is already empty"); </script>');
@@ -349,6 +459,23 @@ class ShoppingCart
         }
     }
 
+    
+    function movePageBack()
+    {
+        if (isset($_SESSION['recordsArr'],$_SESSION['cartIteration']))
+        {
+            $recordsArr = $_SESSION['recordsArr'];
+            end($recordsArr);
+            $key = key($recordsArr);
+            reset($recordsArr);
+
+            if ($key == $_SESSION['cartIteration'] && ($this->getRealCartSize() % $this->pageLimit == 0))
+            {
+                echo("hey");
+                $_SESSION['cartIteration'] = $_SESSION['cartIteration'] - 1;
+            }
+        }
+    }
     private function removeAll()
     {
         if(!$this->refreshed())
@@ -359,6 +486,8 @@ class ShoppingCart
                 if($this->shoppingCart[$ID] > 0)
                 {
                         $this->shoppingCart[$ID] = 0;
+                        $this->movePageBack();
+                            
                         if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
                         {
                             unset($this->checkout[$ID]);
