@@ -151,6 +151,7 @@ class ShoppingCart
             }
            
             $this->subtotal($subtotal, $timestamp);
+            $this->calcGrandTotal();
             $retval = TRUE;
         }
         return($retval);      
@@ -186,6 +187,8 @@ class ShoppingCart
         
         echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
         printf("<td class= 'currency'>$%.2f</td>\n", $subtotal);
+        echo "<tr><td colspan= '4' align='right' >Grandtotal</td>\n";
+        printf("<td class= 'currency'>$%.2f</td>\n", $this->calcGrandTotal());
         
         if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
         {
@@ -229,6 +232,16 @@ class ShoppingCart
         }
     }
     
+    private function calcGrandTotal()
+    {
+        $grandtotal = 0;
+        foreach ($this->shoppingCart as $key => $value)
+        {
+            $grandtotal += ($this->inventory[$key]['prodPrice'] * $value);
+        }
+        return ($grandtotal);
+    }
+    
     private function populateInvTableContent(&$subtotal, $timestamp)
     { 
         
@@ -236,9 +249,7 @@ class ShoppingCart
         $invKeys = array_keys($this->inventory);
         
         if (!isset($_SESSION['invIteration']))
-        {
             $this->pageIteration = 0;
-        }
         else
         {
             if (isset($_GET['nextPage']))
@@ -471,7 +482,6 @@ class ShoppingCart
 
             if ($key == $_SESSION['cartIteration'] && ($this->getRealCartSize() % $this->pageLimit == 0))
             {
-                echo("hey");
                 $_SESSION['cartIteration'] = $_SESSION['cartIteration'] - 1;
             }
         }
