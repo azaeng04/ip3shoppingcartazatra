@@ -13,7 +13,7 @@ class ShoppingCart
     private $storeID = "";
     private $pageIteration = 0;
     private $cartPageIteration = 0;
-    private $pageLimit = 4;
+    private $pageLimit = 2;
 
     
     function __construct()
