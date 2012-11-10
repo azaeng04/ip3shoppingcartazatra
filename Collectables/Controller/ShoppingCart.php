@@ -473,14 +473,11 @@ class ShoppingCart
     
     function movePageBack()
     {
-        if (isset($_SESSION['recordsArr'],$_SESSION['cartIteration']))
+        if ($_SESSION['cartIteration'])
         {
-            $recordsArr = $_SESSION['recordsArr'];
-            end($recordsArr);
-            $key = key($recordsArr);
-            reset($recordsArr);
-
-            if ($key == $_SESSION['cartIteration'] && ($this->getRealCartSize() % $this->pageLimit == 0))
+            $realCartSize = $this->getRealCartSize();
+            $maxIterator = (int)($realCartSize/$this->pageLimit);
+            if ($maxIterator == $_SESSION['cartIteration'] && ($realCartSize % $this->pageLimit == 0))
             {
                 $_SESSION['cartIteration'] = $_SESSION['cartIteration'] - 1;
             }
