@@ -9,13 +9,13 @@ class ShoppingCart
     private $DBConnect = null;
     private $inventory = array();
     private $shoppingCart = array();
+    private $checkout = array();
     private $storeID = "";
 
     
     function __construct()
     {
             $this->DBHandler = new DBHander();
-            $this->DBHandler->setDB('localhost', 'root', '', 'collectables');
             $this->DBConnect = $this->DBHandler->connectToDB();
     }
 
@@ -67,7 +67,6 @@ class ShoppingCart
     
     public function sortArray ($passedArr)
     {
-       print_r($passedArr);
        $size = count($passedArr);
        for ($i=1; $i<$size; $i++) 
        {
@@ -110,7 +109,8 @@ class ShoppingCart
         $retval = FALSE;
         $subtotal = 0;
         $timestamp = sha1(microtime(true));
-        $redirect = "http://localhost/Collectables/showcart.php";
+        $checkoutPage = "order-processed.php";
+        $redirect = "showcart.php";
         if(count($this->inventory) > 0)
         {
             if (strstr($_SERVER['SCRIPT_NAME'], 'testFunctions.php')) 
@@ -126,8 +126,13 @@ class ShoppingCart
             }
             else
             {
-                echo $this->tableHeaders()."<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
-
+                if (!$this->cartEmpty()) 
+                {
+                    echo $this->tableHeaders() . "<th><a href='$checkoutPage'><img border='0' src='images/images/cart/checkout.jpg' /></a></th><th>&nbsp;</th></tr>\n";
+                }
+                else
+                    echo $this->tableHeaders() . "<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
+                
                 $this->populateCartTableContent($subtotal, $timestamp);
             }
            
@@ -152,8 +157,6 @@ class ShoppingCart
         
         return $retval;
     }
-    
-
 
     private function tableHeaders()
     {
@@ -165,11 +168,10 @@ class ShoppingCart
     
     private function subtotal($subtotal, $timestamp)
     {  
-        $prevPage = "";
-        $productsPage = "http://localhost/Collectables/testFunctions.php";
+        $productsPage = "testFunctions.php";
         
         echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
-        printf("<td >$%.2f</td>\n", $subtotal);
+        printf("<td class= 'currency'>$%.2f</td>\n", $subtotal);
         
         if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
         {
@@ -179,29 +181,27 @@ class ShoppingCart
             }
             else
             {
-                $prevPage = "http://localhost/Collectables/testFunctions.php";
-                echo $this->echoEmptyCart($timestamp, $prevPage);
+                echo $this->echoEmptyCart($timestamp, $productsPage);
             }
         }
         else
         {            
-            echo $this->echoEmptyCart($timestamp, $prevPage);
+            echo $this->echoEmptyCart($timestamp, $productsPage);
         }
         echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
                 "<th>&nbsp;</th><th>&nbsp;</th>" .
-                "<th>&nbsp;</th><th align='left'></th>".
-                "<th>&nbsp;</th></tr>\n";
+                "<th>&nbsp;</tr>\n";
         echo"</table>";
     }
     
-    private function echoEmptyCart($timestamp, &$prevPage)
+    private function echoEmptyCart($timestamp, &$productsPage)
     {
         if (!$this->cartEmpty()) 
         {
             if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
             {
                 return "<td ><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
-                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a><a href='$prevPage'><img src='images/images/cart/edit-cart.jpg' /></a></td></tr>\n";
+                        "&EmptyCart=TRUE&tokenID=" . $timestamp . "'><img src='images/images/cart/empty-cart.jpg' /></a><a href='$productsPage'><img src='images/images/cart/edit-cart.jpg' /></a></td></tr>\n";
             }
             else
             {
@@ -221,9 +221,9 @@ class ShoppingCart
         {  
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
             echo "<td >".htmlentities($value['prodDesc'])."</td>\n";
-            printf("<td >$%.2f</td>\n", $value['prodPrice']);
-            echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
-            printf("<td >$%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
+            printf("<td class= 'currency'>$%.2f</td>\n", $value['prodPrice']);
+            echo "<td align='center' class= 'currency'>".$this->shoppingCart[$ID]."</td>\n";
+            printf("<td class= 'currency'>$%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
             echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
                          "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
             echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
@@ -235,11 +235,11 @@ class ShoppingCart
     }
 
     private function populateCartTableContent(&$subtotal, $timestamp)
-    {        
+    {  
         foreach($this->shoppingCart as $ID => $value)
         {  
             if ($value > 0) 
-            {
+            {                
                 echo "<tr><td >". htmlentities($this->inventory[$ID]['prodName'])."</td>\n";
                 echo "<td >".htmlentities($this->inventory[$ID]['prodDesc'])."</td>\n";
                 printf("<td >$%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
@@ -252,8 +252,10 @@ class ShoppingCart
                 echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
                              "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
+            
+                $this->checkout[$ID] = $this->shoppingCart[$ID];
             }
-        } 
+        }
     }
     
     public function showCart() 
@@ -284,31 +286,28 @@ class ShoppingCart
     
     public  function addItem()
     {
-            if(!$this->refreshed() && !isset($_GET['btnNo']) && isset($_GET['ItemToAdd']))
-            {
-                
-                $ID = $_GET['ItemToAdd'];
-            
-                
-                if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
-                {
-                    unset($_SESSION['Last_ID']);
-                    $promptURL = "/Collectables/Controller/AddItemPrompt.php?productName=" . $this->inventory[$ID]['prodName'] . "&ID=" . $ID;
-                    $this->changeURL($promptURL);
-                }
-                else
-                {
-                      if (array_key_exists($ID, $this->shoppingCart))
-                      {
-                      $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
-                      }         
-                      $_SESSION['Last_ID'] = $ID;
-                      $_SESSION['prevToken'] = $_GET['tokenID'];
-                }
-            }
+        if(!$this->refreshed() && !isset($_GET['btnNo']) && isset($_GET['ItemToAdd']))
+        {
 
-            
-            //$this->changeURL($_SERVER['SCRIPT_NAME']);
+            $ID = $_GET['ItemToAdd'];
+
+
+            if (isset($_SESSION['Last_ID']) && ($_SESSION['Last_ID'] === $ID))
+            {
+                unset($_SESSION['Last_ID']);
+                $promptURL = "/Collectables/Controller/AddItemPrompt.php?productName=" . $this->inventory[$ID]['prodName'] . "&ID=" . $ID;
+                $this->changeURL($promptURL);
+            }
+            else
+            {
+                  if (array_key_exists($ID, $this->shoppingCart))
+                  {
+                    $this->shoppingCart[$ID] = $this->shoppingCart[$ID] + 1;
+                  }         
+                  $_SESSION['Last_ID'] = $ID;
+                  $_SESSION['prevToken'] = $_GET['tokenID'];
+            }
+        }
     }
 
     private  function addOne()
@@ -340,7 +339,11 @@ class ShoppingCart
         {
             foreach($this->shoppingCart as $key => $value)
             {
-               $this->shoppingCart[$key] = 0;         
+               $this->shoppingCart[$key] = 0;
+               if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
+               {
+                    unset($this->checkout[$key]);
+               }
             }        
             $_SESSION['prevToken'] = $_GET['tokenID'];
         }
@@ -356,6 +359,10 @@ class ShoppingCart
                 if($this->shoppingCart[$ID] > 0)
                 {
                         $this->shoppingCart[$ID] = 0;
+                        if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
+                        {
+                            unset($this->checkout[$ID]);
+                        }
                 }
                 else
                     echo('<script type="text/javascript"> alert("The cart is already empty"); </script>');
@@ -396,8 +403,9 @@ class ShoppingCart
     }
 
     public function checkout()
-    {			
-            echo "<p><strong>Your order has been recorded.</strong></p>\n";
+    {
+        print_r($this->checkout);
+        $this->DBHandler->insertIntoOrderLine($this->checkout);
     }  
 }
 ?>

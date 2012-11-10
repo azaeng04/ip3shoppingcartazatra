@@ -19,6 +19,7 @@ if (class_exists("ShoppingCart")){
 }
 else {
      $ErrorMsgs[] = "The ShoppingCart class is not available!";
+     echo '<p>'.$ErrorMsgs[0].'</p>';
      $Store = NULL;
 }
 ?>
@@ -27,18 +28,15 @@ else {
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title><?php echo $storeInfo['storeName']; ?></title>
-<link rel="stylesheet" type="text/css" href="styles/style.css" />
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 </head>
 <body>
     <h1><?php echo htmlentities($storeInfo['storeName']); ?></h1>
     <h2><?php echo htmlentities($storeInfo['storeDesc']); ?></h2>
-    <h3><?php echo htmlentities($storeInfo['welcomeMsg']); ?></h3>
+    <p><?php echo htmlentities($storeInfo['welcomeMsg']); ?></p>
     <?php
-         $Store->getProductList();
+         $Store->checkout();
          $_SESSION['currentStore'] = serialize($Store);
-         //'ShowCart.php?PHPSESSID
     ?>
 </body>
 </html>
-
