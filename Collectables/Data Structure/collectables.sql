@@ -3,8 +3,8 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 07, 2012 at 06:27 PM
--- Server version: 5.5.24
+-- Generation Time: Nov 10, 2012 at 11:56 PM
+-- Server version: 5.5.24-log
 -- PHP Version: 5.4.3
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
@@ -19,6 +19,54 @@ SET time_zone = "+00:00";
 --
 -- Database: `collectables`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer`
+--
+
+CREATE TABLE IF NOT EXISTS `customer` (
+  `customerID` int(11) NOT NULL,
+  `firstName` varchar(50) NOT NULL,
+  `lastName` varchar(50) NOT NULL,
+  PRIMARY KEY (`customerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer`
+--
+
+INSERT INTO `customer` (`customerID`, `firstName`, `lastName`) VALUES
+(1, 'John', 'Doe'),
+(2, 'James', 'Seacrest'),
+(3, 'Anton', 'Davis'),
+(4, 'Rick', 'Sanchez'),
+(5, 'Dave', 'Jacobs');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `logininfo`
+--
+
+CREATE TABLE IF NOT EXISTS `logininfo` (
+  `customerID` int(11) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  PRIMARY KEY (`customerID`),
+  UNIQUE KEY `password` (`password`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `logininfo`
+--
+
+INSERT INTO `logininfo` (`customerID`, `password`) VALUES
+(1, 'customer1'),
+(2, 'customer2'),
+(3, 'customer3'),
+(4, 'customer4'),
+(5, 'customer5');
 
 -- --------------------------------------------------------
 
@@ -42,8 +90,8 @@ CREATE TABLE IF NOT EXISTS `orderline` (
 
 CREATE TABLE IF NOT EXISTS `orders` (
   `orderID` int(11) NOT NULL,
-  `orderDesc` varchar(255) NOT NULL,
   `orderDate` date NOT NULL,
+  `customerID` int(11) NOT NULL,
   PRIMARY KEY (`orderID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

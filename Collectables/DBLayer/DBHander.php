@@ -1,5 +1,4 @@
 <?php
-
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -90,7 +89,7 @@ class DBHander
 
      private function insertIntoOrders($orderID)
      {
-         $insert = "INSERT INTO ORDERS VALUES($orderID, CURDATE())";
+         $insert = "INSERT INTO ORDERS VALUES($orderID, CURDATE(),".$_SESSION['validUser'].")";
          
          $this->insertUpdateDelete($insert);
      }
@@ -144,9 +143,45 @@ class DBHander
              echo $exc->getMessage();
          }
      }
+     
+     function userExists($array) {
+         $exists = TRUE;
+         try 
+         {
+             $findUser = "SELECT * FROM logininfo WHERE customerID = " . $array[0] . " AND password = '" . $array[1] . "'";
+             $result = $this->db_conn->query($findUser);
+             if ($result->num_rows !== 0) 
+             {
+                 return $exists;
+             }
+             else
+             {
+                 return FALSE;
+             }
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+     }
+     
+     
+     public function getUserDetails($custID) 
+     {
+         try 
+         {
+             $findUser = "SELECT * FROM customer WHERE customerID = $custID";
+             $result = $this->db_conn->query($findUser);
+             return ($result->fetch_assoc());
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+     }
 
 
-     function displayErrorMsgs()
+     public function displayErrorMsgs()
      {
          foreach ($this->errorMsgs as $value)
          {

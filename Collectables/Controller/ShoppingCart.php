@@ -1,5 +1,4 @@
 <?php
-
 define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
 require_once(__ROOTShoppingCart__.'\DBLayer\DBHander.php'); 
 
@@ -13,7 +12,7 @@ class ShoppingCart
     private $storeID = "";
     private $pageIteration = 0;
     private $cartPageIteration = 0;
-    private $pageLimit = 2;
+    private $pageLimit = 5;
 
     
     function __construct()
@@ -487,7 +486,7 @@ class ShoppingCart
     {
         if(!$this->refreshed())
         {
-        $ID = $_GET['RemoveAll'];
+            $ID = $_GET['RemoveAll'];
             if (array_key_exists($ID, $this->shoppingCart))
             {
                 if($this->shoppingCart[$ID] > 0)
@@ -521,8 +520,7 @@ class ShoppingCart
     }
 
     public function getProductInfo($prodID) 
-    {
-        
+    {        
             $SQLstring = "SELECT * FROM product WHERE prodID = '" . $prodID . "'";
             $QueryResult = @$this->DBConnect->query($SQLstring);
             if($QueryResult === FALSE)
@@ -540,8 +538,8 @@ class ShoppingCart
 
     public function checkout()
     {
-        print_r($this->checkout);
         $this->DBHandler->insertIntoOrderLine($this->checkout);
+        $this->shoppingCart = array();
     }  
 }
 ?>
