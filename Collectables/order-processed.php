@@ -35,7 +35,7 @@ else {
     <h2><?php echo htmlentities($storeInfo['storeDesc']); ?></h2>
     <p><?php echo htmlentities($storeInfo['welcomeMsg']); ?></p>
     <?php
-         $Store->checkout();
+         $Store->checkout();         
          $_SESSION['currentStore'] = serialize($Store);
     ?>
 </body>
