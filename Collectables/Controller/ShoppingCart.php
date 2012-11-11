@@ -36,7 +36,7 @@ class ShoppingCart
     {
             if($this->storeID != $storeID)
             {
-                $this->storeID = $storeID;
+                $this->storeID = "Cars";
                 $SQLString = "SELECT * FROM product WHERE storeID = '" . $this->storeID ."'";
                 $QueryResult = @$this->DBConnect->query($SQLString);
                 $this->populateInventory($QueryResult);
@@ -52,10 +52,19 @@ class ShoppingCart
     {
         $this->pageLimit = $pageLimit;
     }
+    
+    public function getFirstKey($inventory)
+   {
+        $testArray = $inventory;
+        reset ($testArray);
+        $key = key($testArray);
+        return ($key);
+   }
 
         
     private function populateInventory($QueryResult)
     {
+        
         if($QueryResult === FALSE)
         {
             $this->storeID = "";
@@ -73,6 +82,9 @@ class ShoppingCart
             } 
         }
         $this->inventory = $this->sortArray($this->inventory);
+        
+        $this->getFirstKey($this->inventory);
+        
     }
     
    
@@ -81,9 +93,11 @@ class ShoppingCart
     public function sortArray ($passedArr)
     {
        $size = count($passedArr);
-       for ($i=1; $i<$size; $i++) 
+       $min = $this->getFirstKey($passedArr);
+       $max = $size + $min - 1;
+       for ($i=$min; $i<$max; $i++) 
        {
-        for ($j=1; $j<$size; $j++) 
+        for ($j=$min; $j<$max; $j++) 
         {
             if (strcmp($passedArr[$j+1]['prodName'], $passedArr[$j]['prodName']) < 0) 
             {
@@ -261,9 +275,11 @@ class ShoppingCart
 
         $recordsPassed = $this->pageIteration *  $this->pageLimit;
         $counter = 1;
-        while((($counter + $recordsPassed) <= $invSize) && $counter <= $this->pageLimit)
+        $firstKey = $this->getFirstKey($this->inventory);
+        
+        while((($counter + $recordsPassed + $firstKey) <= ($invSize + $firstKey)) && $counter <= $this->pageLimit)
         {  
-            $value = $this->inventory[$counter + $recordsPassed];
+            $value = $this->inventory[$counter + $recordsPassed + $firstKey - 1];
             $ID = $invKeys[$counter + $recordsPassed - 1];
             
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
@@ -338,9 +354,10 @@ class ShoppingCart
         
         $counter = 1;
         $boughtItemIterator = 1;
-        while((($counter + $recordsPassed) <= $cartSize) && $boughtItemIterator <= $this->pageLimit)
+        $firstKey = $this->getFirstKey($this->inventory);
+        while((($counter + $recordsPassed + $firstKey) <= ($cartSize + $firstKey)) && $boughtItemIterator <= $this->pageLimit)
         {  
-            $value = $this->shoppingCart[$counter + $recordsPassed];
+            $value = $this->shoppingCart[$counter + $recordsPassed + $firstKey -1];
             $ID = $cartKeys[$counter + $recordsPassed - 1];
             if ($value > 0) 
             {                
