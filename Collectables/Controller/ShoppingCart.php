@@ -56,8 +56,8 @@ class ShoppingCart
     public function getFirstKey($inventory)
    {
         $testArray = $inventory;
-        reset ($testArray);
         $key = key($testArray);
+        reset ($testArray);
         return ($key);
    }
 
