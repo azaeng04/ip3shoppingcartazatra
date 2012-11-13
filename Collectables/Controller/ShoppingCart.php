@@ -32,19 +32,11 @@ class ShoppingCart
     {
             $this->DBConnect = $this->DBHandler->connectToDB();
     }
-
-    
-    public function cameFromProduct()
-    {
-        $previousURL = $_SERVER['HTTP_REFERER'];
-        echo ($previousURL);
-        return (strstr($previousURL, 'products.php') || strstr($previousURL, 'AddItemPrompt.php'));
-    }
     
     public function setStoreID($storeID)
     {
             
-            if($this->storeID != $storeID || !$this->cameFromProduct())
+            if($this->storeID != $storeID)
             {
                 $this->storeID = $storeID;
                 $SQLString = "SELECT * FROM product WHERE storeID = '" . $this->storeID ."'";
@@ -614,6 +606,7 @@ class ShoppingCart
         if (isset($this->shoppingCart)) 
         {
             unset($this->shoppingCart);
+            $this->storeID = null;
         }
         $this->shoppingCart = array();
     }
