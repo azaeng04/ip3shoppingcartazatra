@@ -1,3 +1,20 @@
+<SCRIPT language="JavaScript">
+<!--
+
+function PopUp(pPage) 
+{
+var wid = screen.width;
+var hei = screen.height;
+var popwid = "750";
+var pophei = "500";
+var leftPos = (wid-popwid)/2;
+var topPos = (hei-pophei)/2;
+window.open(pPage,'popWin','resizable=yes,scrollbars=no,width=' + popwid + ',height=' + pophei + ',left='+leftPos+',top='+topPos);
+}
+
+//-->
+</SCRIPT>
+
 <?php
 define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
 require_once(__ROOTShoppingCart__.'\DBLayer\DBHander.php'); 
@@ -319,7 +336,8 @@ class ShoppingCart
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice']);
             echo "<td align='center' class= 'currency'>".$this->shoppingCart[$ID]."</td>\n";
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
-            echo "<td align='center'><img src='". $this->getImageURL($value) . "' height='40' width='60'></td>\n";
+            echo "<td align='center'><a href = 'javascript:PopUp(\"" . $this->getImageURL($value) . "\")'><img src='". $this->getImageURL($value) . "' height='60' width='80'> </a></td>\n";
+            
             $this->addRemoveDelete($ID, $timestamp, $inStock);
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
             $counter++;
@@ -413,7 +431,7 @@ class ShoppingCart
                 printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
                 echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
                 printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
-                echo "<td align='center'><img src='". $this->getImageURL($this->inventory[$ID]) . "' height='40' width='60'></td>\n";
+                echo "<td align='center'><a href = 'javascript:PopUp(\"" . $this->getImageURL($this->inventory[$ID]) . "\")'><img src='". $this->getImageURL($this->inventory[$ID]) . "' height='60' width='80'> </a></td>\n";
                 $this->addRemoveDelete($ID, $timestamp, $inStock);
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
                 $this->checkout[$ID] = $this->shoppingCart[$ID];
