@@ -66,6 +66,19 @@ class ShoppingCart
         reset ($testArray);
         return ($key);
    }
+   
+   private function getImageURL($value)
+   {
+       $path = "images/images/";
+       $fileFormat  = ".jpg";
+       if ($value['imageURL'] != null)
+       {
+           $path = $path . $this->storeID . "/";
+           return ($path . $value['imageURL'] . $fileFormat);
+       }
+       else
+            return ($path . "image_not_available" . $fileFormat);
+   }
 
         
     private function populateInventory($QueryResult)
@@ -208,7 +221,7 @@ class ShoppingCart
         return "<table width= '100%' align='center'>\n".
                 "<tr align='left'><th>Product Name</th><th>Product Description</th>".
                 "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
-                "<th>Total Price</th>";
+                "<th>Total Price</th><th>Photo</th>";
     }
     
     private function subtotal($subtotal, $timestamp)
@@ -306,7 +319,7 @@ class ShoppingCart
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice']);
             echo "<td align='center' class= 'currency'>".$this->shoppingCart[$ID]."</td>\n";
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
-            echo "<td align='center'><img src='images/images/". $value['imageURL'] . ".jpg' height='40' width='60'></td>\n";
+            echo "<td align='center'><img src='". $this->getImageURL($value) . "' height='40' width='60'></td>\n";
             $this->addRemoveDelete($ID, $timestamp, $inStock);
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
             $counter++;
