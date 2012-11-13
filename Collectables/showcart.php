@@ -1,7 +1,11 @@
 <?php
-session_start();
+session_start ();
 require_once('\Controller\ShoppingCart.php');
-$storeID = "Cars";
+$storeKey = $_SESSION['storeID'];
+foreach ($storeKey as $key => $value) 
+{
+    $storeID = $key;
+}    
 $storeInfo = array();
 if (class_exists("ShoppingCart")){
      if (isset($_SESSION['currentStore']))
@@ -25,20 +29,37 @@ else {
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php echo $storeInfo['storeName']; ?></title>
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-</head>
-<body>
-    <h1><?php echo htmlentities($storeInfo['storeName']); ?></h1>
-    <h2><?php echo htmlentities($storeInfo['storeDesc']); ?></h2>
-    <p><?php echo htmlentities($storeInfo['welcomeMsg']); ?></p>
-    <?php
-         $Store->showCart();
-         $_SESSION['currentStore'] = serialize($Store);
-         //'ShowCart.php?PHPSESSID
-    ?>
+<html dir="ltr" lang="en-US">
+    <head><!-- Created by Artisteer v4.0.0.58475 -->
+        <meta charset="utf-8">
+        <title>Show Cart</title>
+        <?php include('header.php')?>
+
+    
+    <div class="art-sheet clearfix">
+        <div class="art-layout-wrapper clearfix">
+            <div class="art-content-layout">
+                <div class="art-content-layout-row">
+                    <div class="art-layout-cell art-content clearfix">
+                        <article class="art-post art-article">
+                            <?php
+                                $Store->showCart();
+                                $_SESSION['currentStore'] = serialize($Store);
+                                //'ShowCart.php?PHPSESSID
+                           ?>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<?php include ('footer.php');?>
+
+</div>
+
+
 </body>
 </html>
+    
 

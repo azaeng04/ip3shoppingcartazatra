@@ -100,6 +100,7 @@ class DBHander
          {
             $maxOrderID = $this->getMaxID("orders", "orderID");
             $this->insertIntoOrders($maxOrderID);
+            $_SESSION['currentOrder'] = $maxOrderID;
             foreach ($shoppingCartArray as $productID => $quantity) 
             {
                 $maxOrdlineID = $this->getMaxID("orderline", "orderLineID");
@@ -108,7 +109,9 @@ class DBHander
                 $this->insertUpdateDelete($insertOrder);
                 echo "<p>Orderline ID: $maxOrdlineID, Order ID: $maxOrderID, Product ID: $productID Quantity: $quantity </p>";
             }
-            $this->updateInStock($shoppingCartArray);            
+            $this->updateInStock($shoppingCartArray);
+            $orderDetails = $this->getOrderDetailsOnProdsOfCust($maxOrderID);
+            return $orderDetails;
          }
          catch (Exception $exc) 
          {
@@ -180,7 +183,61 @@ class DBHander
          }
      }
 
+     function getOrderDetailsOnProdsOfCust() 
+     {
+         try 
+         {
+             $getOrdersProd = "select orders.orderID, orders.orderDate, product.prodID, product.prodName, product.prodPrice".
+                              " from orders, product, orderline".
+                              " where orderline.orderID = ".$_SESSION['currentOrder'].
+                              " and orderline.prodID = product.prodID".
+                              " and orders.customerID = ".$_SESSION['validUser'];
+             $orderDetails = $this->getMultipleOrderDetails($getOrdersProd);
+             return $orderDetails;
+//             return $result->fetch_assoc();
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+     }
 
+     
+     private function getMultipleOrderDetails($getOrdersProd) 
+     {
+         try 
+         {
+             $orderDetails = array();
+             $result = $this->db_conn->query($getOrdersProd);
+             while ( ($data = $result->fetch_assoc()) !== NULL )
+             {
+                $orderDetails[$data['prodID']] = array();
+                $orderDetails[$data['prodID']]['orderID'] = $data['orderID'];
+                $orderDetails[$data['prodID']]['orderDate'] = $data['orderDate'];
+                $orderDetails[$data['prodID']]['prodName'] = $data['prodName'];
+                $orderDetails[$data['prodID']]['prodPrice'] = $data['prodPrice'];
+             }
+             return $orderDetails;
+         } catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+    }
+     
+     public function getInStockValue($prodID) 
+     {
+         try 
+         {
+             $getInstockVaue = "SELECT inStock FROM product WHERE prodID = $prodID;";
+             $result = $this->db_conn->query($getInstockVaue);
+             return $result->fetch_array();
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+     }
+     
      public function displayErrorMsgs()
      {
          foreach ($this->errorMsgs as $value)
