@@ -413,6 +413,7 @@ class ShoppingCart
                 printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
                 echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
                 printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
+                echo "<td align='center'><img src='". $this->getImageURL($this->inventory[$ID]) . "' height='40' width='60'></td>\n";
                 $this->addRemoveDelete($ID, $timestamp, $inStock);
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
                 $this->checkout[$ID] = $this->shoppingCart[$ID];
