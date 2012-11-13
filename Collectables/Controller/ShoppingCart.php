@@ -99,8 +99,6 @@ class ShoppingCart
         }
         $this->inventory = $this->sortArray($this->inventory);
         $this->getFirstKey($this->inventory);     
-        
-        print_r($this->inventory);
     }
     
    
