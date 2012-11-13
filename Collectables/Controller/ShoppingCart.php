@@ -6,19 +6,20 @@ class ShoppingCart
 {      
     private $DBHandler = null;
     private $DBConnect = null;
-    private $inventory = array();
-    private $shoppingCart = array();
+    private $statement = NULL;
+    private $inventory = NULL;
+    private $shoppingCart = NULL;
     private $checkout = array();
     private $storeID = "";
     private $pageIteration = 0;
     private $cartPageIteration = 0;
-    private $pageLimit = 5;
+    private $pageLimit = 3;
 
     
     function __construct()
     {
             $this->DBHandler = new DBHander();
-            $this->DBConnect = $this->DBHandler->connectToDB();
+            $this->DBConnect = $this->DBHandler->connectToDB();            
     }
 
     function __destruct()
@@ -36,10 +37,14 @@ class ShoppingCart
     {
             if($this->storeID != $storeID)
             {
-                $this->storeID = "Cars";
+                $this->storeID = $storeID;
                 $SQLString = "SELECT * FROM product WHERE storeID = '" . $this->storeID ."'";
                 $QueryResult = @$this->DBConnect->query($SQLString);
-                $this->populateInventory($QueryResult);
+                if (strstr($_SERVER['SCRIPT_NAME'], 'home.php')) {
+                    return $QueryResult->fetch_array();
+                }
+                else
+                    $this->populateInventory($QueryResult);
             }
     }
     
@@ -71,7 +76,17 @@ class ShoppingCart
         }
         else
         {
-            $this->inventory = array();
+            if (isset($this->inventory,$this->shoppingCart))
+            {
+                unset($this->inventory);
+                unset($this->shoppingCart);
+            }
+            else
+            {
+                $this->inventory = array();
+                $this->shoppingCart = array();
+            }            
+            
             while(($Row = $QueryResult->fetch_assoc()) !== NULL)
             {
                 $this->inventory[$Row['prodID']] = array();
@@ -79,16 +94,14 @@ class ShoppingCart
                 $this->inventory[$Row['prodID']]['prodDesc'] = $Row['prodDesc'];
                 $this->inventory[$Row['prodID']]['prodPrice'] = $Row['prodPrice'];
                 $this->shoppingCart[$Row['prodID']] = 0;
-            } 
+            }
         }
         $this->inventory = $this->sortArray($this->inventory);
-        
-        $this->getFirstKey($this->inventory);
-        
+        $this->getFirstKey($this->inventory);        
     }
     
    
-    
+    //much faster
     
     public function sortArray ($passedArr)
     {
@@ -97,15 +110,18 @@ class ShoppingCart
        $max = $size + $min - 1;
        for ($i=$min; $i<$max; $i++) 
        {
-        for ($j=$min; $j<$max; $j++) 
-        {
-            if (strcmp($passedArr[$j+1]['prodName'], $passedArr[$j]['prodName']) < 0) 
+            for ($j=$min; $j<$max; $j++) 
             {
-                $this->swap($passedArr, $j, $j+1);
+                if (strcmp($passedArr[$j+1]['prodName'], $passedArr[$j]['prodName']) < 0) 
+                {
+                    if (strcmp($passedArr[$j+1]['prodName'], $passedArr[$j]['prodName']) < 0) 
+                    {
+                        $this->swap($passedArr, $j, $j+1);
+                    }
+                }
             }
-        }
-    }
-    return $passedArr;
+       }
+        return $passedArr;
     }
     
     function swap(&$passedArr, $a, $b) 
@@ -140,14 +156,14 @@ class ShoppingCart
         $redirect = "showcart.php";
         if(count($this->inventory) > 0)
         {
-            if (strstr($_SERVER['SCRIPT_NAME'], 'testFunctions.php')) 
+            if (strstr($_SERVER['SCRIPT_NAME'], 'products.php')) 
             {
                 if ($this->cartEmpty()) 
                 {
-                    echo $this->tableHeaders()."<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
+                    echo $this->tableHeaders()."<th>&nbsp;</th></tr>\n";
                 }
                 else
-                    echo $this->tableHeaders() . "<th><a href='$redirect'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th><th>&nbsp;</th></tr>\n";
+                    echo $this->tableHeaders() . "<th><a href='$redirect'><img border='0' src='images/images/cart/shopping-cart.jpg' /></a></th></tr>\n";
                                     
                 $this->populateInvTableContent($subtotal, $timestamp);
             }
@@ -155,10 +171,10 @@ class ShoppingCart
             {
                 if (!$this->cartEmpty()) 
                 {
-                    echo $this->tableHeaders() . "<th><a href='$checkoutPage'><img border='0' src='images/images/cart/checkout.jpg' /></a></th><th>&nbsp;</th></tr>\n";
+                    echo $this->tableHeaders() . "<th><a href='$checkoutPage'><img border='0' src='images/images/cart/checkout.jpg' /></a></th></tr>\n";
                 }
                 else
-                    echo $this->tableHeaders() . "<th>&nbsp;</th><th>&nbsp;</th></tr>\n";
+                    echo $this->tableHeaders() . "<th>&nbsp;</th></tr>\n";
                 
                 $this->populateCartTableContent($subtotal, $timestamp);
             }
@@ -196,12 +212,12 @@ class ShoppingCart
     
     private function subtotal($subtotal, $timestamp)
     {  
-        $productsPage = "testFunctions.php";
+        $productsPage = "products.php";
         
         echo "<tr><td colspan= '4' align='right' >Subtotal</td>\n";
-        printf("<td class= 'currency'>$%.2f</td>\n", $subtotal);
+        printf("<td colspan = '2' class='currency'>R%.2f</td>\n", $subtotal);
         echo "<tr><td colspan= '4' align='right' >Grandtotal</td>\n";
-        printf("<td class= 'currency'>$%.2f</td>\n", $this->calcGrandTotal());
+        printf("<td class= 'currency'>R%.2f</td>\n", $this->calcGrandTotal());
         
         if (strstr($_SERVER['SCRIPT_NAME'], 'showcart.php')) 
         {
@@ -218,9 +234,6 @@ class ShoppingCart
         {            
             echo $this->echoEmptyCart($timestamp, $productsPage);
         }
-        echo"<tr><th>&nbsp;</th><th>&nbsp;</th>".
-                "<th>&nbsp;</th><th>&nbsp;</th>" .
-                "<th>&nbsp;</tr>\n";
         echo"</table>";
     }
     
@@ -281,18 +294,14 @@ class ShoppingCart
         {  
             $value = $this->inventory[$counter + $recordsPassed + $firstKey - 1];
             $ID = $invKeys[$counter + $recordsPassed - 1];
+            $inStock = $this->DBHandler->getInStockValue($ID);
             
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
             echo "<td >".htmlentities($value['prodDesc'])."</td>\n";
-            printf("<td class= 'currency'>$%.2f</td>\n", $value['prodPrice']);
+            printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice']);
             echo "<td align='center' class= 'currency'>".$this->shoppingCart[$ID]."</td>\n";
-            printf("<td class= 'currency'>$%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
-            echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
-                         "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
-            echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                         "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
-            echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                         "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+            printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
+            $this->addRemoveDelete($ID, $timestamp, $inStock);
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
             $counter++;
         } 
@@ -307,6 +316,24 @@ class ShoppingCart
         //echo("<tr><td>" . $this->pageIteration + 1 . "</td></tr>");
     }
     
+    private function addRemoveDelete($ID, $timestamp, $inStock) 
+    {
+        if ($inStock[0] > 0) 
+        {
+            echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+
+            "&ItemToAdd=$ID&tokenID=" . $timestamp . "'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
+            echo "<a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+            "&ItemToRemove=$ID&tokenID=" . $timestamp . "'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
+            echo "<a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
+            "&RemoveAll=$ID&tokenID=" . $timestamp . "'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+        }
+        else
+            echo "<td align='center'><img border='0' src='images/images/inventory/sold-out.jpg' /></td>";
+
+    }
+
+
     private function getRealCartSize()
     {
         $count = 0;
@@ -341,6 +368,7 @@ class ShoppingCart
         }
         else
         {
+            $inStock = $this->DBHandler->getInStockValue($ID);
             $recordsArr = $_SESSION['recordsArr'];
             if (isset($_GET['nextPage']))
                 $this->cartPageIteration = $_SESSION['cartIteration'] + 1;
@@ -363,15 +391,10 @@ class ShoppingCart
             {                
                 echo "<tr><td >". htmlentities($this->inventory[$ID]['prodName'])."</td>\n";
                 echo "<td >".htmlentities($this->inventory[$ID]['prodDesc'])."</td>\n";
-                printf("<td >$%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
+                printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice']);
                 echo "<td align='center'>".$this->shoppingCart[$ID]."</td>\n";
-                printf("<td >$%.2f</td>\n", $this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
-                echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . 
-                             "&ItemToAdd=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/add-to-cart-1.jpg' /></a>\n";
-                echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                             "&ItemToRemove=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-from-cart-1.jpg' /></a>\n";
-                echo "<a href='" . $_SERVER['SCRIPT_NAME']. "?PHPSESSID=" . session_id() .
-                             "&RemoveAll=$ID&tokenID=" . $timestamp ."'><img border='0' src='images/images/cart/remove-all-from-cart.jpg' /></a></td>\n";
+                printf("<td >R%.2f</td>\n", $this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
+                $this->addRemoveDelete($ID, $timestamp, $inStock);
                 $subtotal += ($this->inventory[$ID]['prodPrice'] * $this->shoppingCart[$ID]);
                 $this->checkout[$ID] = $this->shoppingCart[$ID];
                 $boughtItemIterator ++;
@@ -555,8 +578,28 @@ class ShoppingCart
 
     public function checkout()
     {
-        $this->DBHandler->insertIntoOrderLine($this->checkout);
+        $this->statement = $this->DBHandler->insertIntoOrderLine($this->checkout);
+        $this->clearShoppingCart();
+    }
+    
+    public function generateStatement() 
+    {
+        $this->statement;
+        $this->clearShoppingCart();
+    }
+    
+    public function cancelOrder() 
+    {
+        $this->clearShoppingCart();
+    }
+    
+    public function clearShoppingCart() 
+    {
+        if (isset($this->shoppingCart)) 
+        {
+            unset($this->shoppingCart);
+        }
         $this->shoppingCart = array();
-    }  
+    }
 }
 ?>

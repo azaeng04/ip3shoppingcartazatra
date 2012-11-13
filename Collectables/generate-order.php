@@ -1,26 +1,34 @@
 <?php
 session_start();
 require_once('\Controller\ShoppingCart.php');
+$storeKey = $_SESSION['storeID'];
+$storeInfo = array();
 if (class_exists("ShoppingCart")){
      if (isset($_SESSION['currentStore']))
      {
         $Store = unserialize($_SESSION['currentStore']);
      }
+     else 
+     {
+        $Store = new ShoppingCart();
+     }
+     //Build invenroty items on Store within
+     $Store->setStoreID($storeID);
+     $storeInfo = $Store->getStoreInformation();
 }
-else 
-{
+else {
      $ErrorMsgs[] = "The ShoppingCart class is not available!";
      echo '<p>'.$ErrorMsgs[0].'</p>';
      $Store = NULL;
 }
 ?>
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html dir="ltr" lang="en-US">
     <head><!-- Created by Artisteer v4.0.0.58475 -->
         <meta charset="utf-8">
-        <title>Home</title>
-        <?php include('header.php')?>    
-        <?php include ('navigation.php');?>
+        <title>Show Cart</title>
+        <?php include('header.php')?>
 
     
     <div class="art-sheet clearfix">
@@ -29,20 +37,11 @@ else
                 <div class="art-content-layout-row">
                     <div class="art-layout-cell art-content clearfix">
                         <article class="art-post art-article">
-                            <?php 
-                                $Store->checkout();
-         
+                            <?php
+                                
                                 $_SESSION['currentStore'] = serialize($Store);
+                                //'ShowCart.php?PHPSESSID
                            ?>
-                           <form action="home.php">
-                               <input type="submit" value="Purchase items from a different store" class="btnStyle"/>
-                           </form>
-                           <form action="cancel-order.php">
-                               <input type="submit" value="Cancel order" class="btnStyle"/>
-                           </form>
-                           <form action="generate-order.php">
-                               <input type="submit" value="Generate Statement for Order" class="btnStyle"/>
-                           </form>
                         </article>
                     </div>
                 </div>

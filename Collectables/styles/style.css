@@ -2121,6 +2121,18 @@ blockquote p,
     bottom: 0;
 }
 
+.btnStyle
+{
+    border-size: 0px;
+    border-style: none;
+    background: inherit;
+    font: inherit;
+    color: blue;
+    cursor: hand;
+    cursor: pointer;
+    padding: 0px;
+}
+
 .Navigator .art-ccs-navigator img, .Navigator img
 {
    border: 0;

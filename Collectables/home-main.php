@@ -1,21 +1,53 @@
+<?php
+    $storeID = "";
+    $storeInfo = array();
+    require_once('\Controller\ShoppingCart.php');
+    
+    function setStoreInfo($storeID, $storeInfo) 
+    {
+        if (class_exists("ShoppingCart"))
+        { 
+             $Store = new ShoppingCart();           
+             $Store->setStoreID($storeID);
+             $storeInfo = $Store->getStoreInformation();             
+             return $storeInfo;
+        }
+        else 
+        {
+             $ErrorMsgs[] = "The ShoppingCart class is not available!";
+             echo '<p>'.$ErrorMsgs[0].'</p>';
+             return NULL;
+        }
+    }
+?>
 <div class="art-postcontent art-postcontent-0 clearfix">
     <div class="art-content-layout">
         <div class="art-content-layout-row">
             <div class="art-layout-cell layout-item-0" style="width: 100%" >
-                <h3 style="border-bottom: 1px solid #B6C5C8; padding-bottom: 5px">About</h3>
-                <p>
-                    <span style="font-weight: bold;">Pellentesque cursus blandit suspendisse ultricies nunc tellus duis.</span>
-                </p>
-                
-                <p>Vestibulum vestibulum eu feugiat neque at blandit ante. Congue sollicitudin nisl non ante odio  sed et magna. Ipsum commodo in ac. Eget vitae quam pharetra mauris ipsum felis commodo eu donec. Consectetuer donec. Sed quam ac vivamus parturient quis rhoncus habitasse nullam in leo. Suspendisse tempor pellentesque id tortor et. Commodo ac in sem sapien ut eget quis orci metus. Orci posuere rutrum eros aliquet fusce enim vivamus. Curabitur felis.  Auctor quis sed sagittis tempus ultrices. Justo cras sed enim bibendum  torquent aenean montes sed  libero curae. Aliquam blandit eleifend iaculis vel blandit luctus a. 
-                </p>
+                <?php 
+                    $storeIDArr = array("Action Figures", "Cars", "Comics");
+                    foreach ($storeIDArr as $storeID) {
+                        $storeInfo = setStoreInfo($storeID, $storeInfo);
+                ?>
+                    <h3 style="border-bottom: 1px solid #B6C5C8; padding-bottom: 5px"><?php echo htmlentities($storeInfo['storeName']); ?></h3>
+                    <p>
+                        <span style="font-weight: bold;"><?php echo htmlentities($storeInfo['welcomeMsg']); ?></span>
+                    </p>
 
-                <p>
-                    <a href="#">More</a>
-                </p>
+                    <p>
+                        <?php echo htmlentities($storeInfo['storeDesc']); ?>
+                    </p>
+
+                    <form method="post" action="products.php">
+                        <p>
+                            <input type="submit" name="storeID[<?php echo $storeID; ?>]" value="View and Purchase Store Products" class="btnStyle" />
+                        </p>
+                    </form>
+                <?php                     
+                        $storeInfo = array();
+                    }
+                ?>
             </div>
         </div>
     </div>
 </div>
-
-

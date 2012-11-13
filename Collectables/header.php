@@ -1,3 +1,25 @@
+<?php
+    if(session_id() == '')
+        session_start();
+    require_once('\DBLayer\DBHander.php');
+    $DBConnection = new DBHander();
+    if (class_exists("DBHander"))
+    {
+        if (isset($_SESSION['validUser']))
+        {
+           $DBConnection->connectToDB();
+           $userID = $_SESSION['validUser'];
+           $userDetails = $DBConnection->getUserDetails($userID);
+        }      
+    }
+    else 
+    {
+         $ErrorMsgs[] = "The DBHanger class is not available!";
+         echo '<p>'.$ErrorMsgs[0].'</p>';
+         $userID = NULL;
+    }
+?>
+
 <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
 
 <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
@@ -26,5 +48,13 @@
         <h1 class="art-headline" data-left="0%">
             <a href="home.php">Collectables</a>
         </h1>
+        
+        <div align="right">
+            <label style="font-size: larger;">You are logged in as: </label>
+            <label style="font-size: x-large;"><?php echo $userDetails["firstName"]." ".$userDetails["lastName"]; ?></label>
+        </div>
+        <div align="right">
+            <a href="logout.php" style="font-size: large">Log out</a>
+        </div>
     </div>       
 </header>

@@ -1,8 +1,7 @@
 <?php
     session_start();
     require_once('\DBLayer\DBHander.php');   
-    
-    
+        
     if (is_array($_POST['login'])) 
     {
         processInput();
@@ -33,9 +32,11 @@
         $DBConnection->connectToDB();
         if ($DBConnection->userExists($loginDetails)) 
         {
+            $errorMsg = "";
+            errorMessage($errorMsg);
             $validUser = $_POST['login'];
             $_SESSION['validUser'] = $validUser[0];
-            header("Location: testFunctions.php");
+            header("Location: home.php");
         }
         else
         {
