@@ -33,9 +33,18 @@ class ShoppingCart
             $this->DBConnect = $this->DBHandler->connectToDB();
     }
 
+    
+    public function cameFromProduct()
+    {
+        $previousURL = $_SERVER['HTTP_REFERER'];
+        echo ($previousURL);
+        return (strstr($previousURL, 'products.php') || strstr($previousURL, 'AddItemPrompt.php'));
+    }
+    
     public function setStoreID($storeID)
     {
-            if($this->storeID != $storeID)
+            
+            if($this->storeID != $storeID || !$this->cameFromProduct())
             {
                 $this->storeID = $storeID;
                 $SQLString = "SELECT * FROM product WHERE storeID = '" . $this->storeID ."'";
@@ -69,7 +78,6 @@ class ShoppingCart
         
     private function populateInventory($QueryResult)
     {
-        
         if($QueryResult === FALSE)
         {
             $this->storeID = "";
@@ -93,11 +101,14 @@ class ShoppingCart
                 $this->inventory[$Row['prodID']]['prodName'] = $Row['prodName'];
                 $this->inventory[$Row['prodID']]['prodDesc'] = $Row['prodDesc'];
                 $this->inventory[$Row['prodID']]['prodPrice'] = $Row['prodPrice'];
+                $this->inventory[$Row['prodID']]['imageURL'] = $Row['imageURL'];
                 $this->shoppingCart[$Row['prodID']] = 0;
             }
         }
         $this->inventory = $this->sortArray($this->inventory);
-        $this->getFirstKey($this->inventory);        
+        $this->getFirstKey($this->inventory);     
+        
+        print_r($this->inventory);
     }
     
    
@@ -290,17 +301,22 @@ class ShoppingCart
         $counter = 1;
         $firstKey = $this->getFirstKey($this->inventory);
         
+        
         while((($counter + $recordsPassed + $firstKey) <= ($invSize + $firstKey)) && $counter <= $this->pageLimit)
         {  
+            
+            
             $value = $this->inventory[$counter + $recordsPassed + $firstKey - 1];
             $ID = $invKeys[$counter + $recordsPassed - 1];
             $inStock = $this->DBHandler->getInStockValue($ID);
             
             echo "<tr><td >". htmlentities($value['prodName'])."</td>\n";
             echo "<td >".htmlentities($value['prodDesc'])."</td>\n";
+            
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice']);
             echo "<td align='center' class= 'currency'>".$this->shoppingCart[$ID]."</td>\n";
             printf("<td class= 'currency'>R%.2f</td>\n", $value['prodPrice'] * $this->shoppingCart[$ID]);
+            echo "<td align='center'><img src='images/images/". $value['imageURL'] . ".jpg' height='40' width='60'></td>\n";
             $this->addRemoveDelete($ID, $timestamp, $inStock);
             $subtotal += ($value['prodPrice'] * $this->shoppingCart[$ID]);
             $counter++;
@@ -512,7 +528,7 @@ class ShoppingCart
     
     function movePageBack()
     {
-        if ($_SESSION['cartIteration'])
+        if (isset($_SESSION['cartIteration']))
         {
             $realCartSize = $this->getRealCartSize();
             $maxIterator = (int)($realCartSize/$this->pageLimit);

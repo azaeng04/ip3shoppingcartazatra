@@ -1,11 +1,13 @@
 <?php
     if (isset($_POST['storeID']))
+    {
         $_SESSION['storeID'] = $_POST['storeID'];
+        
+    }
     if (isset($_SESSION['storeID']))
     {        
         require_once('\Controller\ShoppingCart.php');
 
-        
         $storeKey = $_SESSION['storeID'];
 
         foreach ($storeKey as $key => $value) 
