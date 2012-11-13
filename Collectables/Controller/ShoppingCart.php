@@ -318,7 +318,7 @@ class ShoppingCart
     
     private function addRemoveDelete($ID, $timestamp, $inStock) 
     {
-        if ($inStock[0] > 0) 
+        if ($inStock[0] > 0 && $this->shoppingCart[$ID] < $inStock[0]) 
         {
             echo "<td align='left'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() .
 
@@ -367,8 +367,7 @@ class ShoppingCart
             $recordsPassed = 0;
         }
         else
-        {
-            $inStock = $this->DBHandler->getInStockValue($ID);
+        {            
             $recordsArr = $_SESSION['recordsArr'];
             if (isset($_GET['nextPage']))
                 $this->cartPageIteration = $_SESSION['cartIteration'] + 1;
@@ -384,9 +383,10 @@ class ShoppingCart
         $boughtItemIterator = 1;
         $firstKey = $this->getFirstKey($this->inventory);
         while((($counter + $recordsPassed + $firstKey) <= ($cartSize + $firstKey)) && $boughtItemIterator <= $this->pageLimit)
-        {  
+        {              
             $value = $this->shoppingCart[$counter + $recordsPassed + $firstKey -1];
             $ID = $cartKeys[$counter + $recordsPassed - 1];
+            $inStock = $this->DBHandler->getInStockValue($ID);
             if ($value > 0) 
             {                
                 echo "<tr><td >". htmlentities($this->inventory[$ID]['prodName'])."</td>\n";
