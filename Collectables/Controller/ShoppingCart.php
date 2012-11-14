@@ -5,11 +5,11 @@ function PopUp(pPage)
 {
 var wid = screen.width;
 var hei = screen.height;
-var popwid = "750";
-var pophei = "500";
+var popwid = "880";
+var pophei = "550";
 var leftPos = (wid-popwid)/2;
 var topPos = (hei-pophei)/2;
-window.open(pPage,'popWin','resizable=yes,scrollbars=no,width=' + popwid + ',height=' + pophei + ',left='+leftPos+',top='+topPos);
+window.open(pPage,'popWin','resizable=yes,scrollbars=no,toolbar=no,width=' + popwid + ',height=' + pophei + ',left='+leftPos+',top='+topPos);
 }
 
 //-->
