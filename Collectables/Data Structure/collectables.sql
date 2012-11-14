@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 14, 2012 at 04:02 AM
+-- Generation Time: Nov 14, 2012 at 06:40 AM
 -- Server version: 5.5.24-log
 -- PHP Version: 5.4.3
 
@@ -284,17 +284,17 @@ INSERT INTO `product` (`prodID`, `prodName`, `prodPrice`, `inStock`, `storeID`, 
 (16, 'Naruto Shippuuden', 35, 50, 'Comics', NULL, 'Comic about Naruto Shippuuden'),
 (17, 'Bleach', 36, 50, 'Comics', NULL, 'Comic about Bleach'),
 (18, 'Ninja Kid', 37, 50, 'Comics', NULL, 'Comic about Ninja Kid'),
-(19, 'Spiderman', 38, 50, 'Comics', NULL, 'Comic about Spiderman'),
+(19, 'Spiderman', 38, 50, 'Comics', 'spiderman', 'Comic about Spiderman'),
 (20, 'Ninja Girl', 39, 50, 'Comics', NULL, 'Comic about Ninja Girl'),
 (21, 'Superman', 40, 17, 'Action Figures', NULL, 'This is a Superman action figure'),
 (22, 'Naruto', 41, 21, 'Action Figures', NULL, 'This is a Naruto action figure'),
 (23, 'Bleach', 42, 38, 'Action Figures', NULL, 'This is a Bleach action figure'),
-(24, 'Iron Man', 43, 47, 'Action Figures', NULL, 'This is a Iron Man action figure'),
+(24, 'Iron Man', 43, 47, 'Action Figures', 'iron_man', 'This is a Iron Man action figure'),
 (25, 'Ninja Kid', 44, 48, 'Action Figures', NULL, 'This is a Ninja Kid action figure'),
 (26, 'Dragon Samurai', 45, 50, 'Action Figures', NULL, 'This is a Dragon Samurai action figure'),
 (27, 'The Hulk', 46, 50, 'Action Figures', NULL, 'This is a The Hulk action figure'),
 (28, 'Spiderman', 47, 50, 'Action Figures', NULL, 'This is a Spiderman action figure'),
-(29, 'Chuck Norris', 48, 50, 'Action Figures', NULL, 'This is a Chuck Norris action figure'),
+(29, 'Chuck Norris', 48, 50, 'Action Figures', 'chuck', 'This is a Chuck Norris action figure'),
 (30, 'Monkey', 49, 50, 'Action Figures', NULL, 'This is a Monkey action figure');
 
 -- --------------------------------------------------------
