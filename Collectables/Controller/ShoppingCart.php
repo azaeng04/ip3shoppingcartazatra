@@ -1,3 +1,4 @@
+
 <SCRIPT language="JavaScript">
 <!--
 
@@ -14,6 +15,8 @@ window.open(pPage,'popWin','resizable=yes,scrollbars=no,toolbar=no,width=' + pop
 
 //-->
 </SCRIPT>
+
+<link href="tableStyling.css" rel="stylesheet" type="text/css" />
 
 <?php
 define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
@@ -235,7 +238,7 @@ class ShoppingCart
 
     private function tableHeaders()
     {
-        return "<table width= '100%' align='center'>\n".
+        return "<table class='imagetable' width= '100%' align='center'>\n".
                 "<tr align='left'><th>Product Name</th><th>Product Description</th>".
                 "<th>Price Each</th><th align='center'>Quantity in Cart</th>" .
                 "<th>Total Price</th><th>Photo</th>";
