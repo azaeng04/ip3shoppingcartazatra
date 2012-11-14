@@ -1,27 +1,15 @@
 <html>
     <head>
-        
-    <style type="text/css">
-    .tablebg {
-	background-color: #CCC;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #000;
-	border-right-color: #000;
-	border-bottom-color: #000;
-	border-left-color: #000;
-}
-    </style>
+    <link href="tableStyling.css" rel="stylesheet" type="text/css" />
+    
     </head>
     <body>
         <form action = " <?php 
         $prevLink = $_SERVER['HTTP_REFERER'];
         echo ($prevLink);?>" method="get">
-            <table class="tablebg">
+            <table class="imagetable">
             	<tr>
-                <td colspan = 2>
+                <th colspan = 2>
                  	<label>Are are sure you want to add 
                          <?php 
                          if (isset($_GET['productName']) )
@@ -29,7 +17,7 @@
                              echo ($_GET['productName']);
                          }
                          ?> to the shopping cart again?</label>
-                    </td>
+                    </th>
                 </tr>
                 <tr>
                     <td width ="100">
