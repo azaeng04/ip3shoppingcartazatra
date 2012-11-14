@@ -700,7 +700,9 @@ class ShoppingCart
         $results = $this->DBHandler->getAllOrdersOfCustomer();
         if ($results != FALSE) 
         {  
-            echo "<td colpan='3' style='font-size='larger''>Order ID: ".$_SESSION['currentOrder']." successfully deleted</td>";
+            if (isset($_SESSION['currentOrder']) && $this->orderCancelStatus != FALSE) {
+                echo "<td colpan='3' style='font-size='larger''>Order ID: " . $_SESSION['currentOrder'] . " successfully deleted</td>";
+            }
             $this->orderTableHeaders();
             foreach ($results as $key => $value) 
             {

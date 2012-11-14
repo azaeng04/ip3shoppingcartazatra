@@ -1,5 +1,5 @@
 <div class="art-postmetadataheader">
-    <h2 class="art-postheader">Contacts</h2>                                                            
+    <h2 class="art-postheader">Contact Us</h2>                                                            
 </div>
 <div class="art-postcontent art-postcontent-0 clearfix">
     <div class="art-content-layout">    
