@@ -14,6 +14,12 @@
                     echo '<li><a href="products.php">Products</a></li>';
             ?>
             <?php 
+                if(strstr($_SERVER['SCRIPT_NAME'], 'view-orders.php')  === 'view-orders.php')
+                    echo '<li><a href="view-orders.php" class="active">View Orders</a></li>';
+                else
+                    echo '<li><a href="view-orders.php">View Orders</a></li>';
+            ?>
+            <?php 
                 if(strstr($_SERVER['SCRIPT_NAME'], 'contact-us.php')  === 'contact-us.php')
                     echo '<li><a href="contact-us.php"  class="active">Contact Us</a></li>';
                 else

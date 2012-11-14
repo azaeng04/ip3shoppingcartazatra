@@ -26,11 +26,12 @@ class ShoppingCart
 {      
     private $DBHandler = null;
     private $DBConnect = null;
-    private $statement = NULL;
+    private $statement = array();
     private $inventory = NULL;
     private $shoppingCart = NULL;
     private $checkout = array();
     private $storeID = "";
+    private $orderCancelStatus = FALSE;
     private $pageIteration = 0;
     private $cartPageIteration = 0;
     private $pageLimit = 3;
@@ -39,7 +40,7 @@ class ShoppingCart
     function __construct()
     {
             $this->DBHandler = new DBHander();
-            $this->DBConnect = $this->DBHandler->connectToDB();            
+            $this->DBConnect = $this->DBHandler->connectToDB();
     }
 
     function __destruct()
@@ -598,7 +599,29 @@ class ShoppingCart
                     $this->emptyCart();
             if(!empty($_GET['RemoveAll']))
                     $this->removeAll();
+            if(!empty($_GET['OrderToView']))
+                $this->viewOrder();
+            if(!empty($_GET['CancelOrder']))
+                $this->cancelOrder();
     }
+
+    private function viewOrder() 
+    {
+        $_SESSION['currentOrder'] = $_GET['OrderToView'];
+        if (isset($this->statement)) {
+            $this->setStatement();
+        }
+        else
+            $this->setStatement();
+        header('Location: generate-order.php');
+    }
+    
+    private function setStatement() 
+    {
+        $replacement = $this->DBHandler->getOrderDetailsOnProdsOfCust();
+        $this->statement = $replacement;
+    }
+
 
     public function getProductInfo($prodID) 
     {        
@@ -607,8 +630,7 @@ class ShoppingCart
             if($QueryResult === FALSE)
                 exit("<p>Error Obtaining Product Info!</p>");
             else 
-            {
-                
+            { 
                 $Row = $QueryResult->fetch_assoc();
                 if($Row !== NULL) 
                 {
@@ -624,14 +646,91 @@ class ShoppingCart
     }
     
     public function generateStatement() 
-    {
-        $this->statement;
+    {  
+        $subTotal = 0;
+        $grandTotal = 0;
+        echo "<table width='100%'>";
+        echo "<tr><td>";
+        echo "<table width='100%'>";
+        echo "<tr><td>Customer ID: </td><td>".$_SESSION['validUser']."</td></tr>";
+        echo "<tr><td>Customer Name: </td><td>".$_SESSION['custFirstName']." ".$_SESSION['custLastName']."</td></tr>";
+        echo "<tr><td>Customer Address: </td><td>".$_SESSION['custAddress']."</td></tr>";
+        foreach ($this->statement as $key => $value) 
+        {
+            echo "<tr><td>Order ID: </td><td>".$this->statement[$key]['orderID']."</td></tr>";
+            echo "<tr><td>Order Made: </td><td>". date("j-F-Y", strtotime($this->statement[$key]['orderDate']))."</td></tr>";
+            break;
+        }
+        echo "</table></td>";
+        echo "<td colspan='4'><img src='images/images/logo/collectables-logo.jpg' /></td></tr>";        
+        echo "<tr>";
+        echo "<td>Product ID</td>";
+        echo "<td>Product Name</td>";
+        echo "<td>Product Price</td>";
+        echo "<td>Quantity</td>";
+        echo "<td>Subtotal</td>";
+        echo "</tr>";
+        foreach ($this->statement as $key => $value) 
+        {
+            echo "<tr>";
+            echo "<td>$key</td>";
+            echo "<td>".$this->statement[$key]['prodName']."</td>";
+            printf("<td> R%.2f </td>", $this->statement[$key]['prodPrice']);
+            echo "<td>".$this->statement[$key]['quantity']."</td>";
+            $subTotal = $this->statement[$key]['prodPrice'] * $this->statement[$key]['quantity'];
+            $grandTotal += $subTotal;
+            printf("<td> R%.2f </td>", $subTotal);
+            echo "</tr>";
+        }
+        printf("<tr><td colspan='4' algin='right'>Grand Total</td><td> R%.2f </td></tr>", $grandTotal);
+        echo "<tr><td colspan='5' algin='right'><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() ."&CancelOrder=TRUE'><img src='images/images/cart/cancel-order.jpg' /></a></td></tr>";
+        echo "</table>";
+        
         $this->clearShoppingCart();
     }
     
     public function cancelOrder() 
     {
-        $this->clearShoppingCart();
+        $this->orderCancelStatus = $this->DBHandler->cancelOrder($this->statement);
+        header('Location: view-orders.php');
+    }
+    
+    public function viewOrders() 
+    {
+        $results = $this->DBHandler->getAllOrdersOfCustomer();
+        if ($results != FALSE) 
+        {  
+            echo "<td colpan='3' style='font-size='larger''>Order ID: ".$_SESSION['currentOrder']." successfully deleted</td>";
+            $this->orderTableHeaders();
+            foreach ($results as $key => $value) 
+            {
+                
+                if ($this->orderCancelStatus != FALSE) 
+                {                    
+                    $this->ordersContent($key, $results);              
+                    $this->orderCancelStatus = FALSE;
+                }
+                else
+                    $this->ordersContent($key, $results);  
+            }
+            echo "</table>";
+        }
+        else
+            echo "<p style='font-size=larger'>You have not placed any orders yet</p>";
+    }   
+    
+    private function ordersContent($key, $results) 
+    {
+        echo "<tr><td>" . $key . "</td>";
+        echo "<td>" . date("j-F-Y", strtotime($results[$key]['orderDate'])) . "</td>";
+        echo "<td><a href='" . $_SERVER['SCRIPT_NAME'] . "?PHPSESSID=" . session_id() . "&OrderToView=$key'><img src='images/images/cart/view-order-details.jpg' /></a></td></tr>";
+    }
+
+
+    private function orderTableHeaders()
+    {
+        echo "<table width= '100%' align='center'>\n".
+                "<tr align='left'><th>Order ID</th><th>Order Date</th><th>&nbsp;</th><tr>";
     }
     
     public function clearShoppingCart() 
