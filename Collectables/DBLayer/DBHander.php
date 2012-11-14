@@ -106,8 +106,7 @@ class DBHander
                 $maxOrdlineID = $this->getMaxID("orderline", "orderLineID");
                 $insertOrder = "INSERT INTO orderline VALUES($maxOrdlineID, $maxOrderID, $productID, $quantity)";
 
-                $this->insertUpdateDelete($insertOrder);
-                echo "<p>Orderline ID: $maxOrdlineID, Order ID: $maxOrderID, Product ID: $productID Quantity: $quantity </p>";
+                $this->insertUpdateDelete($insertOrder);                
             }
             $this->updateInStock($shoppingCartArray);
             $orderDetails = $this->getOrderDetailsOnProdsOfCust($maxOrderID);
@@ -135,6 +134,23 @@ class DBHander
          }
      }
      
+     private function cancelOrderUpdateInstock($array) 
+     {
+         try 
+         {  
+             foreach ($array as $key => $value) 
+             {
+                 $updateInStock = "UPDATE product SET inStock = inStock + ".$array[$key]['quantity']." WHERE prodID = $key";
+                 $this->insertUpdateDelete($updateInStock);
+             }
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }         
+     }
+
+
      private function insertUpdateDelete($query)
      {
          try 
@@ -183,15 +199,15 @@ class DBHander
          }
      }
 
-     function getOrderDetailsOnProdsOfCust() 
+     public function getOrderDetailsOnProdsOfCust() 
      {
          try 
          {
-             $getOrdersProd = "select orders.orderID, orders.orderDate, product.prodID, product.prodName, product.prodPrice".
+             $getOrdersProd = "select orderline.orderID, orders.orderDate, product.prodID, product.prodName, product.prodPrice, orderline.quantity".
                               " from orders, product, orderline".
-                              " where orderline.orderID = ".$_SESSION['currentOrder'].
-                              " and orderline.prodID = product.prodID".
-                              " and orders.customerID = ".$_SESSION['validUser'];
+                              " where orderline.prodID = product.prodID".
+                              " and orderline.orderID = ".$_SESSION['currentOrder'].
+                              " and orders.orderID = ".$_SESSION['currentOrder'];
              $orderDetails = $this->getMultipleOrderDetails($getOrdersProd);
              return $orderDetails;
 //             return $result->fetch_assoc();
@@ -216,6 +232,7 @@ class DBHander
                 $orderDetails[$data['prodID']]['orderDate'] = $data['orderDate'];
                 $orderDetails[$data['prodID']]['prodName'] = $data['prodName'];
                 $orderDetails[$data['prodID']]['prodPrice'] = $data['prodPrice'];
+                $orderDetails[$data['prodID']]['quantity'] = $data['quantity'];
              }
              return $orderDetails;
          } catch (Exception $exc) 
@@ -223,8 +240,35 @@ class DBHander
              echo $exc->getMessage();
          }
     }
-     
-     public function getInStockValue($prodID) 
+    
+    public function getAllOrdersOfCustomer() 
+    {
+        try 
+         {
+             $getAllOrders = "SELECT * FROM orders WHERE customerID = ".$_SESSION['validUser'].";";
+             $orderDetails = array();
+             $result = $this->db_conn->query($getAllOrders);
+             
+             if ($result != FALSE) 
+             {
+                 while (($data = $result->fetch_assoc()) !== NULL)              
+                 {
+                     $orderDetails[$data['orderID']] = array();
+                     $orderDetails[$data['orderID']]['orderDate'] = $data['orderDate'];
+                 }
+             }
+             else
+                 $orderDetails = $result;
+             return $orderDetails;
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }        
+    }
+
+
+    public function getInStockValue($prodID) 
      {
          try 
          {
@@ -236,6 +280,25 @@ class DBHander
          {
              echo $exc->getMessage();
          }
+     }
+     
+     public function cancelOrder($array) 
+     {
+         $retval = FALSE;
+         try 
+         {
+             $cancelOrder = "DELETE FROM orderline WHERE orderID = ".$_SESSION['currentOrder'];
+             $this->insertUpdateDelete($cancelOrder);
+             $cancelOrder = "DELETE FROM orders WHERE orderID = ".$_SESSION['currentOrder'];
+             $this->insertUpdateDelete($cancelOrder);
+             $this->cancelOrderUpdateInstock($array);
+             $retval = TRUE;
+         } 
+         catch (Exception $exc) 
+         {
+             echo $exc->getMessage();
+         }
+         return $retval;
      }
      
      public function displayErrorMsgs()
@@ -257,7 +320,7 @@ class DBHander
          $this->errorMsgs = $errorMsgs;
      }
 
-      function closeConn($dbcnx)
+     function closeConn($dbcnx)
      {
          return ($dbcnx->close());
      }

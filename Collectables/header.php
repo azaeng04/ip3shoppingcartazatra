@@ -51,7 +51,14 @@
         
         <div align="right">
             <label style="font-size: larger;">You are logged in as: </label>
-            <label style="font-size: x-large;"><?php echo $userDetails["firstName"]." ".$userDetails["lastName"]; ?></label>
+            <label style="font-size: x-large;">
+                <?php 
+                    $_SESSION['custFirstName'] =  $userDetails["firstName"];
+                    $_SESSION['custLastName'] =  $userDetails["lastName"];
+                    $_SESSION['custAddress'] =  $userDetails["address"];
+                    echo $userDetails["firstName"]." ".$userDetails["lastName"]; 
+                ?>
+            </label>
         </div>
         <div align="right">
             <a href="logout.php" style="font-size: large">Log out</a>

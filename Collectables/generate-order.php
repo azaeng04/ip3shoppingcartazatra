@@ -1,8 +1,6 @@
 <?php
 session_start();
 require_once('\Controller\ShoppingCart.php');
-$storeKey = $_SESSION['storeID'];
-$storeInfo = array();
 if (class_exists("ShoppingCart")){
      if (isset($_SESSION['currentStore']))
      {
@@ -12,9 +10,7 @@ if (class_exists("ShoppingCart")){
      {
         $Store = new ShoppingCart();
      }
-     //Build invenroty items on Store within
-     $Store->setStoreID($storeID);
-     $storeInfo = $Store->getStoreInformation();
+     $Store->processUserInput();
 }
 else {
      $ErrorMsgs[] = "The ShoppingCart class is not available!";
@@ -29,7 +25,7 @@ else {
         <meta charset="utf-8">
         <title>Show Cart</title>
         <?php include('header.php')?>
-
+        <?php include('navigation.php')?>
     
     <div class="art-sheet clearfix">
         <div class="art-layout-wrapper clearfix">
@@ -38,9 +34,9 @@ else {
                     <div class="art-layout-cell art-content clearfix">
                         <article class="art-post art-article">
                             <?php
+                                $Store->generateStatement();
                                 
                                 $_SESSION['currentStore'] = serialize($Store);
-                                //'ShowCart.php?PHPSESSID
                            ?>
                         </article>
                     </div>

@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 require_once('\Controller\ShoppingCart.php');
 if (class_exists("ShoppingCart")){
@@ -6,6 +6,11 @@ if (class_exists("ShoppingCart")){
      {
         $Store = unserialize($_SESSION['currentStore']);
      }
+     else
+     {
+         $Store = new ShoppingCart();
+     }
+     $Store->processUserInput();
 }
 else 
 {
@@ -18,7 +23,7 @@ else
 <html dir="ltr" lang="en-US">
     <head><!-- Created by Artisteer v4.0.0.58475 -->
         <meta charset="utf-8">
-        <title>Home</title>
+        <title>View Orders</title>
         <?php include('header.php')?>    
         <?php include ('navigation.php');?>
 
@@ -29,18 +34,13 @@ else
                 <div class="art-content-layout-row">
                     <div class="art-layout-cell art-content clearfix">
                         <article class="art-post art-article">
+                            <h2 class="art-postheader"> View Orders</h2>
                             <?php 
-                                $Store->checkout();
+                                $Store->viewOrders();
                                 
                                 $_SESSION['currentStore'] = serialize($Store);
-                           ?>
-                            <p style="font-size: larger">Order successfully processed!! :)</p>
-                           <form action="home.php">
-                               <input type="submit" value="Purchase items from a different store" class="btnStyle"/>
-                           </form>
-                           <form action="generate-order.php">
-                               <input type="submit" value="Generate Statement for Order" class="btnStyle"/>
-                           </form>
+                            ?>
+                            <td style="font-size: larger"></td>
                         </article>
                     </div>
                 </div>

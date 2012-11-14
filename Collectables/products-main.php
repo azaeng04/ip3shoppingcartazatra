@@ -1,11 +1,11 @@
-<?php
+<?php    
     if (isset($_POST['storeID']))
-    {
         $_SESSION['storeID'] = $_POST['storeID'];
-        
-    }
     if (isset($_SESSION['storeID']))
-    {        
+    { 
+        echo "Select store: <a>Figurines</a>".
+         "<a> Comicon</a>".
+         "<a> Car Collectables</a>";
         require_once('\Controller\ShoppingCart.php');
 
         $storeKey = $_SESSION['storeID'];
@@ -47,6 +47,6 @@
         $_SESSION['currentStore'] = serialize($Store);
     }
     else
-        echo "Select a store";
+        echo "Select store: <a>Figurines</a><a> Comicon</a><a> Car Collectables</a>";
 ?>
 <div class="art-postcontent art-postcontent-0 clearfix"><p><br></p></div>
