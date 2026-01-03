@@ -2,20 +2,8 @@
   "installation": {
     "version": "22.3.3"
   },
-  "plugins": [
-    {
-      "plugin": "@nx/php/composer",
-      "options": {
-        "installTargetName": "install",
-        "updateTargetName": "update",
-        "ignorePattern": "**/{tests,fixtures}/**"
-      }
-    }
-  ],
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*"
-    ],
+    "default": ["{projectRoot}/**/*"],
     "production": [
       "default",
       "!{projectRoot}/**/*.md",
@@ -30,6 +18,11 @@
     "lint": {
       "cache": true
     }
+  },
+  "useInferencePlugins": false,
+  "projects": {
+    "api-collectables": "apps/api-collectables",
+    "shared-screenplay": "libs/shared-screenplay"
   },
   "defaultBase": "master",
   "nxCloudId": "69596e02a229d8398cbdd400"

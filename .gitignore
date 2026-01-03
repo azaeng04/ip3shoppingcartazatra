@@ -4,3 +4,6 @@
 .nx/workspace-data
 node_modules/
 vendor
+cache
+.nx
+workspace-data
