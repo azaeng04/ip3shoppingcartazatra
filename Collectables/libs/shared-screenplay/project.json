@@ -1,0 +1,16 @@
+{
+  "name": "shared-screenplay",
+  "projectType": "library",
+  "root": "libs/shared-screenplay",
+  "sourceRoot": "libs/shared-screenplay/src",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "php bin/composer test",
+        "cwd": "."
+      }
+    }
+  },
+  "tags": ["shared", "testing", "screenplay"]
+}

@@ -18,6 +18,14 @@
         "command": "find apps/api-collectables -name '*.php' -print0 | xargs -0 -n1 php -l",
         "cwd": "."
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "php bin/composer test -- --testsuite ApiCollectables",
+        "cwd": ".",
+        "color": true
+      }
     }
   },
   "tags": []
