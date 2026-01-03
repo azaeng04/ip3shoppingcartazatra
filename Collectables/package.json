@@ -1,0 +1,19 @@
+{
+  "name": "collectables",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "nx serve api-collectables",
+    "lint": "nx lint api-collectables"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nx/workspace": "^22.3.3",
+    "nx": "22.3.3"
+  },
+  "nx": {}
+}

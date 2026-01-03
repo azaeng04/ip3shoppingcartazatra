@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+    <testsuites>
+        <testsuite name="SharedScreenplay">
+            <directory>libs/shared-screenplay/tests</directory>
+        </testsuite>
+        <testsuite name="ApiCollectables">
+            <directory>apps/api-collectables/tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

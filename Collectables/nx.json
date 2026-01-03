@@ -1,0 +1,36 @@
+{
+  "installation": {
+    "version": "22.3.3"
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/php/composer",
+      "options": {
+        "installTargetName": "install",
+        "updateTargetName": "update",
+        "ignorePattern": "**/{tests,fixtures}/**"
+      }
+    }
+  ],
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/(test|tests|Test|Tests)/**/*"
+    ]
+  },
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    }
+  },
+  "defaultBase": "master",
+  "nxCloudId": "69596e02a229d8398cbdd400"
+}
