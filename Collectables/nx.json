@@ -21,5 +21,16 @@
       "!{projectRoot}/**/*.md",
       "!{projectRoot}/(test|tests|Test|Tests)/**/*"
     ]
-  }
+  },
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    }
+  },
+  "defaultBase": "master",
+  "nxCloudId": "69596e02a229d8398cbdd400"
 }
