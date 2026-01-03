@@ -1,0 +1,25 @@
+{
+  "installation": {
+    "version": "22.3.3"
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/php/composer",
+      "options": {
+        "installTargetName": "install",
+        "updateTargetName": "update",
+        "ignorePattern": "**/{tests,fixtures}/**"
+      }
+    }
+  ],
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/(test|tests|Test|Tests)/**/*"
+    ]
+  }
+}
