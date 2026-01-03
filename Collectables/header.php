@@ -1,8 +1,10 @@
 <?php
-    if(session_id() == '')
+    if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
-    require_once('\DBLayer\DBHander.php');
+    }
+    require_once(__DIR__ . '/DBLayer/DBHander.php');
     $DBConnection = new DBHander();
+    $userDetails = null;
     if (class_exists("DBHander"))
     {
         if (isset($_SESSION['validUser']))
@@ -24,7 +26,7 @@
 
 <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 <link rel="stylesheet" href="styles/style.css" media="screen">
-<!--[if lte IE 7]><link rel="stylesheet" href="style.ie7.css" media="screen" /><![endif]-->
+<!--[if lte IE 7]><link rel="stylesheet" href="styles/style.ie7.css" media="screen" /><![endif]-->
 <link rel="stylesheet" href="styles/style.responsive.css" media="all">
 
 
@@ -50,18 +52,24 @@
         </h1>
         
         <div align="right">
-            <label style="font-size: larger;">You are logged in as: </label>
-            <label style="font-size: x-large;">
-                <?php 
-                    $_SESSION['custFirstName'] =  $userDetails["firstName"];
-                    $_SESSION['custLastName'] =  $userDetails["lastName"];
-                    $_SESSION['custAddress'] =  $userDetails["address"];
-                    echo $userDetails["firstName"]." ".$userDetails["lastName"]; 
-                ?>
-            </label>
+            <?php if ($userDetails !== null): ?>
+                <label style="font-size: larger;">You are logged in as: </label>
+                <label style="font-size: x-large;">
+                    <?php 
+                        $_SESSION['custFirstName'] =  $userDetails["firstName"];
+                        $_SESSION['custLastName'] =  $userDetails["lastName"];
+                        $_SESSION['custAddress'] =  $userDetails["address"];
+                        echo $userDetails["firstName"]." ".$userDetails["lastName"]; 
+                    ?>
+                </label>
+            <?php else: ?>
+                <a href="login.php" style="font-size: large">Log in</a>
+            <?php endif; ?>
         </div>
+        <?php if ($userDetails !== null): ?>
         <div align="right">
             <a href="logout.php" style="font-size: large">Log out</a>
         </div>
+        <?php endif; ?>
     </div>       
 </header>

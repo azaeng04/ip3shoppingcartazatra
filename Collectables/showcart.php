@@ -1,6 +1,8 @@
 <?php
-session_start ();
-require_once('\Controller\ShoppingCart.php');
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once(__DIR__ . '/Controller/ShoppingCart.php');
 $storeKey = $_SESSION['storeID'];
 foreach ($storeKey as $key => $value) 
 {

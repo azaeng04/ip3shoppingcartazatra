@@ -1,6 +1,8 @@
 <?php 
-session_start();
-require_once('\Controller\ShoppingCart.php');
+if (session_status() !== PHP_SESSION_ACTIVE) {
+   session_start();
+}
+require_once(__DIR__ . '/Controller/ShoppingCart.php');
 if (class_exists("ShoppingCart")){
      if (isset($_SESSION['currentStore']))
      {
@@ -13,7 +15,6 @@ if (class_exists("ShoppingCart")){
      //Build invenroty items on Store within
      session_unset();
      session_destroy();
-     $_SESSION['currentStore'] = serialize($Store);
      header('Location: login.php');
 }
 else {

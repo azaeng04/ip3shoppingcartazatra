@@ -5,14 +5,14 @@
     <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
 
     <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-    <link rel="stylesheet" href="style.css" media="screen">
-    <!--[if lte IE 7]><link rel="stylesheet" href="style.ie7.css" media="screen" /><![endif]-->
-    <link rel="stylesheet" href="style.responsive.css" media="all">
+    <link rel="stylesheet" href="styles/style.css" media="screen">
+    <!--[if lte IE 7]><link rel="stylesheet" href="styles/style.ie7.css" media="screen" /><![endif]-->
+    <link rel="stylesheet" href="styles/style.responsive.css" media="all">
 
 
-    <script src="jquery.js"></script>
-    <script src="script.js"></script>
-    <script src="script.responsive.js"></script>
+    <script src="jscript/jquery.js"></script>
+    <script src="jscript/script.js"></script>
+    <script src="jscript/script.responsive.js"></script>
 <meta name="description" content="Description">
 <meta name="keywords" content="Keywords">
 

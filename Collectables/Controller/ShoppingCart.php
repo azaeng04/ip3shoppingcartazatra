@@ -20,7 +20,7 @@ window.open(pPage,'popWin','resizable=yes,scrollbars=no,toolbar=no,width=' + pop
 
 <?php
 define('__ROOTShoppingCart__', dirname(dirname(__FILE__))); 
-require_once(__ROOTShoppingCart__.'\DBLayer\DBHander.php'); 
+require_once(__ROOTShoppingCart__ . '/DBLayer/DBHander.php'); 
 
 class ShoppingCart
 {      
@@ -60,13 +60,22 @@ class ShoppingCart
             if($this->storeID != $storeID)
             {
                 $this->storeID = $storeID;
-                $SQLString = "SELECT * FROM product WHERE storeID = '" . $this->storeID ."'";
-                $QueryResult = @$this->DBConnect->query($SQLString);
-                if (strstr($_SERVER['SCRIPT_NAME'], 'home.php')) {
-                    return $QueryResult->fetch_array();
+                $stmt = $this->DBConnect->prepare("SELECT * FROM product WHERE storeID = ?");
+                if ($stmt === false) {
+                    return null;
                 }
-                else
+                $stmt->bind_param('s', $this->storeID);
+                $stmt->execute();
+                $QueryResult = $stmt->get_result();
+                if (strstr($_SERVER['SCRIPT_NAME'], 'home.php')) {
+                    $first = $QueryResult ? $QueryResult->fetch_array() : null;
+                    $stmt->close();
+                    return $first;
+                }
+                else {
                     $this->populateInventory($QueryResult);
+                    $stmt->close();
+                }
             }
     }
     
@@ -172,12 +181,18 @@ class ShoppingCart
             $retval = FALSE;
             if($this->storeID != "")
             {
-                    $SQLString = "SELECT * FROM storeinfo WHERE storeID = '" . $this->storeID . "'";
-                    $QueryResult = @$this->DBConnect->query($SQLString);
+                    $stmt = $this->DBConnect->prepare("SELECT * FROM storeinfo WHERE storeID = ?");
+                    if ($stmt === false) {
+                        return false;
+                    }
+                    $stmt->bind_param('s', $this->storeID);
+                    $stmt->execute();
+                    $QueryResult = $stmt->get_result();
                     if($QueryResult !== FALSE)
                     {
                         $retval = $QueryResult->fetch_assoc();
                     }
+                    $stmt->close();
             }
             return($retval);
     }
@@ -625,18 +640,24 @@ class ShoppingCart
 
     public function getProductInfo($prodID) 
     {        
-            $SQLstring = "SELECT * FROM product WHERE prodID = '" . $prodID . "'";
-            $QueryResult = @$this->DBConnect->query($SQLstring);
+            $stmt = $this->DBConnect->prepare("SELECT * FROM product WHERE prodID = ?");
+            if ($stmt === false) {
+                exit("<p>Error Obtaining Product Info!</p>");
+            }
+            $stmt->bind_param('i', $prodID);
+            $stmt->execute();
+            $QueryResult = $stmt->get_result();
             if($QueryResult === FALSE)
                 exit("<p>Error Obtaining Product Info!</p>");
             else 
             { 
                 $Row = $QueryResult->fetch_assoc();
+                $stmt->close();
                 if($Row !== NULL) 
                 {
                         return($Row);
                 }
-            }			
+            }
     }
 
     public function checkout()

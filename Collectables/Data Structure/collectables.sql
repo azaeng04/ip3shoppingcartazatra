@@ -55,7 +55,7 @@ INSERT INTO `customer` (`customerID`, `firstName`, `lastName`, `address`) VALUES
 DROP TABLE IF EXISTS `logininfo`;
 CREATE TABLE IF NOT EXISTS `logininfo` (
   `customerID` int(11) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `password` varchar(64) NOT NULL,
   PRIMARY KEY (`customerID`),
   UNIQUE KEY `password` (`password`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -65,11 +65,11 @@ CREATE TABLE IF NOT EXISTS `logininfo` (
 --
 
 INSERT INTO `logininfo` (`customerID`, `password`) VALUES
-(1, 'customer1'),
-(2, 'customer2'),
-(3, 'customer3'),
-(4, 'customer4'),
-(5, 'customer5');
+(1, 'dea26157fa355301663174eac368538cff8939f36681d6712dedba439ab98b70'),
+(2, 'c8c7cb5b9e8f7a1b3d1d02602ada62327132391dbe0e8ee07913cd550eea1f3b'),
+(3, '18c5c9be898c65c5e5c51ac3e94feacff0b991f8463a3a18eb524e9f7e6131a8'),
+(4, '059550e3991d13d8d6f4f0e980c67138a367e34b0e189be682f8b660de681eca'),
+(5, '4a3f26e5142fdceee09b1324103d62b210e78c2b23710f50f708b8eddafa9e81');
 
 -- --------------------------------------------------------
 

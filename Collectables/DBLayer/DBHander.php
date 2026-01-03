@@ -167,16 +167,21 @@ class DBHander
          $exists = TRUE;
          try 
          {
-             $findUser = "SELECT * FROM logininfo WHERE customerID = " . $array[0] . " AND password = '" . $array[1] . "'";
-             $result = $this->db_conn->query($findUser);
-             if ($result->num_rows !== 0) 
+             $hashed = hash('sha256', $array[1]);
+             $stmt = $this->db_conn->prepare("SELECT customerID FROM logininfo WHERE customerID = ? AND password = ?");
+             if ($stmt === false) {
+                 throw new Exception($this->db_conn->error);
+             }
+             $stmt->bind_param('is', $array[0], $hashed);
+             $stmt->execute();
+             $result = $stmt->get_result();
+             if ($result && $result->num_rows !== 0) 
              {
+                 $stmt->close();
                  return $exists;
              }
-             else
-             {
-                 return FALSE;
-             }
+             $stmt->close();
+             return FALSE;
          } 
          catch (Exception $exc) 
          {
@@ -189,9 +194,16 @@ class DBHander
      {
          try 
          {
-             $findUser = "SELECT * FROM customer WHERE customerID = $custID";
-             $result = $this->db_conn->query($findUser);
-             return ($result->fetch_assoc());
+             $stmt = $this->db_conn->prepare("SELECT * FROM customer WHERE customerID = ?");
+             if ($stmt === false) {
+                 throw new Exception($this->db_conn->error);
+             }
+             $stmt->bind_param('i', $custID);
+             $stmt->execute();
+             $result = $stmt->get_result();
+             $data = $result ? $result->fetch_assoc() : null;
+             $stmt->close();
+             return $data;
          } 
          catch (Exception $exc) 
          {
@@ -203,14 +215,22 @@ class DBHander
      {
          try 
          {
-             $getOrdersProd = "select orderline.orderID, orders.orderDate, product.prodID, product.prodName, product.prodPrice, orderline.quantity".
-                              " from orders, product, orderline".
-                              " where orderline.prodID = product.prodID".
-                              " and orderline.orderID = ".$_SESSION['currentOrder'].
-                              " and orders.orderID = ".$_SESSION['currentOrder'];
-             $orderDetails = $this->getMultipleOrderDetails($getOrdersProd);
+             $stmt = $this->db_conn->prepare(
+                 "select orderline.orderID, orders.orderDate, product.prodID, product.prodName, product.prodPrice, orderline.quantity " .
+                 "from orders, product, orderline " .
+                 "where orderline.prodID = product.prodID " .
+                 "and orderline.orderID = ? " .
+                 "and orders.orderID = ?"
+             );
+             if ($stmt === false) {
+                 throw new Exception($this->db_conn->error);
+             }
+             $stmt->bind_param('ii', $_SESSION['currentOrder'], $_SESSION['currentOrder']);
+             $stmt->execute();
+             $result = $stmt->get_result();
+             $orderDetails = $this->getMultipleOrderDetails($result);
+             $stmt->close();
              return $orderDetails;
-//             return $result->fetch_assoc();
          } 
          catch (Exception $exc) 
          {
@@ -219,20 +239,21 @@ class DBHander
      }
 
      
-     private function getMultipleOrderDetails($getOrdersProd) 
+     private function getMultipleOrderDetails($resultSet) 
      {
          try 
          {
              $orderDetails = array();
-             $result = $this->db_conn->query($getOrdersProd);
-             while ( ($data = $result->fetch_assoc()) !== NULL )
-             {
-                $orderDetails[$data['prodID']] = array();
-                $orderDetails[$data['prodID']]['orderID'] = $data['orderID'];
-                $orderDetails[$data['prodID']]['orderDate'] = $data['orderDate'];
-                $orderDetails[$data['prodID']]['prodName'] = $data['prodName'];
-                $orderDetails[$data['prodID']]['prodPrice'] = $data['prodPrice'];
-                $orderDetails[$data['prodID']]['quantity'] = $data['quantity'];
+             if ($resultSet) {
+                 while ( ($data = $resultSet->fetch_assoc()) !== NULL )
+                 {
+                    $orderDetails[$data['prodID']] = array();
+                    $orderDetails[$data['prodID']]['orderID'] = $data['orderID'];
+                    $orderDetails[$data['prodID']]['orderDate'] = $data['orderDate'];
+                    $orderDetails[$data['prodID']]['prodName'] = $data['prodName'];
+                    $orderDetails[$data['prodID']]['prodPrice'] = $data['prodPrice'];
+                    $orderDetails[$data['prodID']]['quantity'] = $data['quantity'];
+                 }
              }
              return $orderDetails;
          } catch (Exception $exc) 
@@ -241,14 +262,18 @@ class DBHander
          }
     }
     
-    public function getAllOrdersOfCustomer() 
+     public function getAllOrdersOfCustomer() 
     {
         try 
          {
-             $getAllOrders = "SELECT * FROM orders WHERE customerID = ".$_SESSION['validUser'].";";
+             $stmt = $this->db_conn->prepare("SELECT orderID, orderDate FROM orders WHERE customerID = ?");
+             if ($stmt === false) {
+                 throw new Exception($this->db_conn->error);
+             }
+             $stmt->bind_param('i', $_SESSION['validUser']);
+             $stmt->execute();
+             $result = $stmt->get_result();
              $orderDetails = array();
-             $result = $this->db_conn->query($getAllOrders);
-             
              if ($result != FALSE) 
              {
                  while (($data = $result->fetch_assoc()) !== NULL)              
@@ -259,6 +284,7 @@ class DBHander
              }
              else
                  $orderDetails = $result;
+             $stmt->close();
              return $orderDetails;
          } 
          catch (Exception $exc) 
@@ -272,9 +298,16 @@ class DBHander
      {
          try 
          {
-             $getInstockVaue = "SELECT inStock FROM product WHERE prodID = $prodID;";
-             $result = $this->db_conn->query($getInstockVaue);
-             return $result->fetch_array();
+             $stmt = $this->db_conn->prepare("SELECT inStock FROM product WHERE prodID = ?");
+             if ($stmt === false) {
+                 throw new Exception($this->db_conn->error);
+             }
+             $stmt->bind_param('i', $prodID);
+             $stmt->execute();
+             $result = $stmt->get_result();
+             $data = $result ? $result->fetch_array() : null;
+             $stmt->close();
+             return $data;
          } 
          catch (Exception $exc) 
          {

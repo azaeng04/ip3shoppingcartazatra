@@ -6,7 +6,7 @@
         echo "Select store: <a>Figurines</a>".
          "<a> Comicon</a>".
          "<a> Car Collectables</a>";
-        require_once('\Controller\ShoppingCart.php');
+        require_once(__DIR__ . '/Controller/ShoppingCart.php');
 
         $storeKey = $_SESSION['storeID'];
 

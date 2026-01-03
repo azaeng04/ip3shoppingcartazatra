@@ -1,4 +1,3 @@
 <?php
-
-    $_GET[];
+// Legacy placeholder; no-op to satisfy linter.
 ?>

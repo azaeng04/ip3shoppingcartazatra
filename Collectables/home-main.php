@@ -1,7 +1,7 @@
 <?php
     $storeID = "";
     $storeInfo = array();
-    require_once('\Controller\ShoppingCart.php');
+    require_once(__DIR__ . '/Controller/ShoppingCart.php');
     
     function setStoreInfo($storeID, $storeInfo) 
     {
