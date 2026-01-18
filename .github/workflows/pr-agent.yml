@@ -1,0 +1,38 @@
+name: PR Agent - Claude Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-review:
+    if: github.event_name == 'pull_request' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/review'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR Agent Review
+        uses: Codium-ai/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          github_action_config: |
+            [config]
+            model = "claude-sonnet-4-20250514"
+            model_turbo = "claude-sonnet-4-20250514"
+            fallback_models = ["claude-sonnet-4-20250514"]
+            
+            [pr_reviewer]
+            enable_review_labels_security = true
+            enable_review_labels_effort = true
+            extra_instructions = "Focus on: code quality, security vulnerabilities, test coverage, and performance."
+            
+            [pr_description]
+            enable_pr_type = true
+            enable_semantic_files_types = true
