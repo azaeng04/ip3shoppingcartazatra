@@ -1,0 +1,95 @@
+name: Update Quality Dashboard
+
+on:
+  workflow_run:
+    workflows: ["SonarCloud Analysis"]
+    types: [completed]
+    branches: [master, main]
+
+jobs:
+  update-dashboard:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dashboard repo
+        uses: actions/checkout@v4
+        with:
+          repository: azaeng04/quality-dashboard
+          token: ${{ secrets.DASHBOARD_PAT }}
+          ref: main
+
+      - name: Fetch SonarCloud metrics
+        id: sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          PROJECT_KEY="azaeng04_ip3shoppingcartazatra"
+
+          RESPONSE=$(curl -s -u "$SONAR_TOKEN:" \
+            "https://sonarcloud.io/api/measures/component?component=${PROJECT_KEY}&metricKeys=reliability_rating,security_rating,sqale_rating,bugs,vulnerabilities,code_smells,duplicated_lines_density,coverage")
+
+          echo "response<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update data.json
+        run: |
+          PROJECT_NAME="ip3shoppingcartazatra"
+          RESPONSE='${{ steps.sonar.outputs.response }}'
+
+          if echo "$RESPONSE" | jq -e '.component.measures' > /dev/null 2>&1; then
+            get_metric() {
+              echo "$RESPONSE" | jq -r ".component.measures[] | select(.metric==\"$1\") | .value // \"N/A\""
+            }
+
+            QUALITY_RATING=$(get_metric "sqale_rating")
+            VULNERABILITIES=$(get_metric "vulnerabilities")
+            BUGS=$(get_metric "bugs")
+            DUPLICATION=$(get_metric "duplicated_lines_density")
+
+            case "$QUALITY_RATING" in
+              1.0) QUALITY="A" ;;
+              2.0) QUALITY="B" ;;
+              3.0) QUALITY="C" ;;
+              4.0) QUALITY="D" ;;
+              5.0) QUALITY="F" ;;
+              *) QUALITY="$QUALITY_RATING" ;;
+            esac
+
+            jq --arg name "$PROJECT_NAME" \
+               --arg quality "$QUALITY" \
+               --arg vulns "${VULNERABILITIES:-0}" \
+               --arg maint "$QUALITY" \
+               --arg bugs "${BUGS:-0}" \
+               --arg dup "${DUPLICATION:-0}" \
+               --arg date "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+               '
+               .lastUpdated = $date |
+               (.repositories[] | select(.name == $name) | .metrics) |= {
+                 quality: $quality,
+                 vulnerabilities: ($vulns | tonumber? // 0),
+                 maintainability: $maint,
+                 techDebt: .techDebt,
+                 bugs: ($bugs | tonumber? // 0),
+                 duplication: ($dup | tonumber? // 0),
+                 mutationScore: .mutationScore
+               }
+               ' data.json > data.json.tmp && mv data.json.tmp data.json
+
+            echo "Updated metrics for $PROJECT_NAME"
+          else
+            echo "No valid SonarCloud data received, skipping update"
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update metrics for ip3shoppingcartazatra [skip ci]"
+            git push
+          fi

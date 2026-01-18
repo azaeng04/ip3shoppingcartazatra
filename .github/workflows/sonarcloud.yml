@@ -1,0 +1,131 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check SonarCloud configuration
+        id: check-sonar
+        run: |
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::warning::SONAR_TOKEN not configured. Please set up SonarCloud and add the token to repository secrets."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up PHP
+        if: steps.check-sonar.outputs.configured == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+          tools: composer
+
+      - name: Cache Composer packages
+        if: steps.check-sonar.outputs.configured == 'true'
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        if: steps.check-sonar.outputs.configured == 'true'
+        run: composer install --prefer-dist --no-progress
+        continue-on-error: true
+
+      - name: Run tests with coverage
+        if: steps.check-sonar.outputs.configured == 'true'
+        run: |
+          if [ -f "vendor/bin/phpunit" ]; then
+            vendor/bin/phpunit --coverage-clover=coverage.xml --log-junit=test-results.xml
+          else
+            echo "PHPUnit not found, skipping tests"
+          fi
+        continue-on-error: true
+
+      - name: SonarCloud Scan
+        if: steps.check-sonar.outputs.configured == 'true'
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+      - name: Skip notice
+        if: steps.check-sonar.outputs.configured == 'false'
+        run: |
+          echo "::notice::SonarCloud scan skipped - SONAR_TOKEN not configured."
+          echo "To enable SonarCloud analysis:"
+          echo "1. Create a SonarCloud account at https://sonarcloud.io"
+          echo "2. Import this repository to your SonarCloud organization"
+          echo "3. Generate a token at https://sonarcloud.io/account/security"
+          echo "4. Add the token as SONAR_TOKEN in repository secrets"
+
+  mutation-testing:
+    name: Mutation Testing (Infection)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        continue-on-error: true
+
+      - name: Check if tests exist
+        id: check-tests
+        run: |
+          if [ -d "tests" ] || find . -name "*Test.php" -o -name "*_test.php" | grep -q .; then
+            echo "has_tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_tests=false" >> $GITHUB_OUTPUT
+            echo "::notice::No PHP test files found. Mutation testing requires tests."
+          fi
+
+      - name: Install Infection
+        if: steps.check-tests.outputs.has_tests == 'true'
+        run: composer require --dev infection/infection
+        continue-on-error: true
+
+      - name: Run Infection
+        if: steps.check-tests.outputs.has_tests == 'true'
+        run: |
+          if [ -f "vendor/bin/infection" ]; then
+            vendor/bin/infection --threads=4 --min-msi=0 --min-covered-msi=0 --logger-html=infection.html
+          else
+            echo "::warning::Infection not installed properly"
+          fi
+        continue-on-error: true
+
+      - name: Upload Mutation Report
+        if: steps.check-tests.outputs.has_tests == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: infection-report
+          path: infection.html
+          retention-days: 30
+          if-no-files-found: ignore
+# Trigger rebuild
