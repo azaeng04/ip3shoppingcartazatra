@@ -31,7 +31,36 @@ jobs:
             [pr_reviewer]
             enable_review_labels_security = true
             enable_review_labels_effort = true
-            extra_instructions = "Focus on: code quality, security vulnerabilities, test coverage, and performance."
+            extra_instructions = """
+            Review with focus on:
+            
+            **Performance:**
+            - Algorithm complexity (Big O)
+            - Memory usage and leaks
+            - Database query optimization
+            - Caching opportunities
+            - Async/parallel processing
+            
+            **Design Patterns (OO):**
+            - SOLID principles compliance
+            - GoF patterns applicability (Factory, Strategy, Observer, etc.)
+            - Dependency injection usage
+            - Proper encapsulation and abstraction
+            
+            **Functional Programming:**
+            - Pure functions and immutability
+            - Function composition
+            - Higher-order functions usage
+            - Avoiding side effects
+            - Monads and functors where applicable
+            
+            **Code Maintenance:**
+            - DRY principle adherence
+            - Single responsibility
+            - Clear naming conventions
+            - Testability considerations
+            - Documentation needs
+            """
             
             [pr_description]
             enable_pr_type = true
