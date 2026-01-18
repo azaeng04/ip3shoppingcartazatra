@@ -128,3 +128,4 @@ jobs:
           path: infection.html
           retention-days: 30
           if-no-files-found: ignore
+# Trigger rebuild
